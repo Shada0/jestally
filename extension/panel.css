@@ -1,0 +1,86 @@
+/* Jestally v3 — Panel CSS */
+#jly-panel {
+  position: fixed; bottom: 24px; right: 24px; z-index: 2147483647;
+  width: 340px; min-width: 280px; max-width: 520px;
+  background: linear-gradient(145deg, #1a1730, #0f0d1a);
+  border: 1px solid rgba(167,139,250,0.25); border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(167,139,250,0.08);
+  font-family: system-ui, -apple-system, sans-serif; font-size: 13px;
+  color: #e2d9f3; overflow: hidden; transition: opacity 0.2s, transform 0.2s; user-select: none;
+}
+#jly-panel.jly-size-s { width: 280px; font-size: 11px; }
+#jly-panel.jly-size-m { width: 340px; font-size: 13px; }
+#jly-panel.jly-size-l { width: 440px; font-size: 14px; }
+.jly-hd { display:flex;align-items:center;justify-content:space-between;padding:10px 14px 8px;background:rgba(167,139,250,0.06);border-bottom:1px solid rgba(167,139,250,0.12); }
+.jly-logo { display:flex;align-items:center;gap:6px; }
+.jly-icon { font-size:16px; }
+.jly-name { font-weight:700;font-size:14px;letter-spacing:0.02em;color:#c4b5fd; }
+.jly-hd-right { display:flex;align-items:center;gap:6px; }
+.jly-sizes { display:flex;gap:3px; }
+.jly-sz { background:none;border:1px solid rgba(167,139,250,0.2);color:rgba(167,139,250,0.6);border-radius:5px;padding:1px 6px;font-size:10px;cursor:pointer;transition:all 0.15s; }
+.jly-sz:hover,.jly-sz-active { background:rgba(167,139,250,0.15);color:#c4b5fd;border-color:rgba(167,139,250,0.5); }
+.jly-sw { width:36px;height:20px;border-radius:10px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);cursor:pointer;position:relative;transition:background 0.2s; }
+.jly-sw::after { content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#aaa;transition:all 0.2s; }
+.jly-sw.jly-on { background:rgba(167,139,250,0.5);border-color:rgba(167,139,250,0.7); }
+.jly-sw.jly-on::after { left:18px;background:#c4b5fd; }
+.jly-btn { background:none;border:none;color:#a78bfa;cursor:pointer;font-size:14px;padding:2px 6px;border-radius:6px; }
+.jly-btn:hover { background:rgba(167,139,250,0.12); }
+.jly-body { padding:10px 12px 12px;display:flex;flex-direction:column;gap:8px; }
+.jly-hidden { display:none !important; }
+.jly-tabs { display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:10px;padding:3px; }
+.jly-tab { flex:1;padding:5px;border:none;border-radius:8px;cursor:pointer;background:none;color:rgba(196,181,253,0.5);font-size:11px;font-weight:600;transition:all 0.15s; }
+.jly-tab-active { background:rgba(167,139,250,0.2);color:#c4b5fd; }
+.jly-tab-content { display:flex;flex-direction:column;gap:8px; }
+.jly-lang-bar { display:flex;align-items:center;gap:6px;flex-wrap:wrap; }
+.jly-lang-label { font-size:10px;color:rgba(196,181,253,0.5);white-space:nowrap; }
+.jly-lchips { display:flex;gap:3px;flex-wrap:wrap; }
+.jly-lchip { padding:2px 8px;border-radius:20px;border:1px solid rgba(167,139,250,0.2);background:none;color:rgba(196,181,253,0.6);font-size:10px;cursor:pointer;transition:all 0.15s; }
+.jly-lchip:hover { background:rgba(167,139,250,0.12);color:#c4b5fd; }
+.jly-lchip-active { background:rgba(167,139,250,0.25);color:#c4b5fd;border-color:rgba(167,139,250,0.5); }
+.jly-lang-more { background:rgba(255,255,255,0.05);border:1px solid rgba(167,139,250,0.2);color:#a78bfa;border-radius:6px;font-size:10px;padding:2px 4px;cursor:pointer; }
+.jly-stage { min-height:90px;border-radius:12px;background:rgba(255,255,255,0.03);border:1px solid rgba(167,139,250,0.1);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative; }
+.jly-wave { display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px; }
+.jly-bars { display:flex;gap:3px;align-items:center;height:28px; }
+.jly-bar { width:3px;border-radius:2px;background:rgba(167,139,250,0.5);animation:jlybar 1s ease-in-out infinite; }
+.jly-bar:nth-child(1){height:8px;animation-delay:0s;}.jly-bar:nth-child(2){height:18px;animation-delay:0.1s;}.jly-bar:nth-child(3){height:26px;animation-delay:0.2s;}.jly-bar:nth-child(4){height:18px;animation-delay:0.3s;}.jly-bar:nth-child(5){height:8px;animation-delay:0.4s;}
+@keyframes jlybar{0%,100%{opacity:0.3;transform:scaleY(0.6);}50%{opacity:1;transform:scaleY(1);}}
+.jly-wave-lbl { font-size:11px;color:rgba(196,181,253,0.6);margin:0; }
+.jly-shimmer-wrap { display:flex;flex-direction:column;gap:8px;padding:16px;width:100%; }
+.jly-shimmer { height:12px;border-radius:6px;background:linear-gradient(90deg,rgba(167,139,250,0.1),rgba(167,139,250,0.3),rgba(167,139,250,0.1));background-size:200% 100%;animation:jlyshim 1.2s linear infinite; }
+@keyframes jlyshim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.jly-shimmer-lbl { font-size:10px;color:rgba(196,181,253,0.4);margin:0;text-align:center; }
+.jly-gif { width:100%;max-height:200px;object-fit:contain;border-radius:8px;background:#000; }
+.jly-err { display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px; }
+.jly-err-lbl { font-size:11px;color:#f87171;margin:0; }
+.jly-retry { background:rgba(248,113,113,0.15);border:1px solid rgba(248,113,113,0.3);color:#f87171;border-radius:8px;padding:4px 14px;cursor:pointer;font-size:11px; }
+.jly-retry:hover { background:rgba(248,113,113,0.25); }
+.jly-isl-preview { display:flex;align-items:center;gap:6px;padding:5px 10px;background:rgba(167,139,250,0.08);border-radius:8px;border:1px solid rgba(167,139,250,0.15); }
+.jly-isl-preview-label { font-size:9px;color:rgba(167,139,250,0.5);font-weight:700;letter-spacing:0.08em; }
+.jly-isl-preview-text { font-size:11px;color:#c4b5fd;font-weight:600;word-break:break-word; }
+.jly-transcript { min-height:18px;font-size:11px;color:rgba(196,181,253,0.5);text-align:center;padding:0 4px; }
+.jly-text-input-row { display:flex;gap:6px;align-items:center; }
+.jly-mic-btn { width:32px;height:32px;border-radius:50%;border:none;background:rgba(167,139,250,0.15);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s; }
+.jly-mic-btn:hover { background:rgba(167,139,250,0.28); }
+.jly-mic-active { background:rgba(248,113,113,0.25) !important;animation:jlypulse 1s ease-in-out infinite; }
+@keyframes jlypulse{0%,100%{box-shadow:0 0 0 0 rgba(248,113,113,0.4);}50%{box-shadow:0 0 0 6px rgba(248,113,113,0);}}
+.jly-text-input { flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(167,139,250,0.2);border-radius:10px;padding:6px 10px;color:#e2d9f3;font-size:12px;outline:none;transition:border-color 0.2s; }
+.jly-text-input:focus { border-color:rgba(167,139,250,0.5);background:rgba(255,255,255,0.09); }
+.jly-text-input::placeholder { color:rgba(196,181,253,0.3); }
+.jly-send-btn { width:32px;height:32px;border-radius:50%;border:none;background:rgba(167,139,250,0.25);color:#c4b5fd;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background 0.15s; }
+.jly-send-btn:hover { background:rgba(167,139,250,0.4); }
+.jly-prog { display:flex;align-items:center;justify-content:center;gap:6px;min-height:14px; }
+.jly-dots { display:flex;gap:4px; }
+.jly-dot { width:6px;height:6px;border-radius:50%;background:rgba(167,139,250,0.2);transition:all 0.2s; }
+.jly-dot-active { background:#a78bfa;transform:scale(1.3); }
+.jly-dot-done { background:rgba(167,139,250,0.5); }
+.jly-counter { font-size:10px;color:rgba(196,181,253,0.4); }
+.jly-cam-wrap { position:relative;width:100%;height:200px;border-radius:10px;overflow:hidden;background:#0f0d1a;border:1px solid rgba(167,139,250,0.15); }
+.jly-cam-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#0f0d1a;color:rgba(167,139,250,0.4);font-size:12px;z-index:2; }
+.jly-sign-result { display:flex;align-items:baseline;gap:8px;padding:4px 0; }
+.jly-sign-label { font-size:20px;font-weight:700;color:#c4b5fd;letter-spacing:0.04em; }
+.jly-sign-conf { font-size:11px;color:rgba(167,139,250,0.5); }
+.jly-speech-out { font-size:12px;color:rgba(196,181,253,0.7);min-height:18px;padding:6px 10px;background:rgba(255,255,255,0.04);border-radius:8px; }
+.jly-in-controls { display:flex;gap:6px; }
+.jly-ctrl-btn { flex:1;padding:7px;border-radius:10px;border:1px solid rgba(167,139,250,0.2);background:rgba(167,139,250,0.1);color:#c4b5fd;cursor:pointer;font-size:11px;font-weight:600;transition:all 0.15s; }
+.jly-ctrl-btn:hover { background:rgba(167,139,250,0.22);border-color:rgba(167,139,250,0.4); }
+.jly-resize-handle { position:absolute;bottom:0;right:0;width:14px;height:14px;cursor:se-resize;background:linear-gradient(135deg,transparent 50%,rgba(167,139,250,0.25) 50%);border-radius:0 0 16px 0; }

@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Jestally — Model Training</title>
+  <style>
+    :root {
+      --v:     #8b7cf8;
+      --v-dim: rgba(139,124,248,0.15);
+      --bg:    #0f0d1a;
+      --surf:  #1a1730;
+      --surf2: #211e38;
+      --bord:  rgba(139,124,248,0.15);
+      --text:  #f0eeff;
+      --muted: rgba(240,238,255,0.5);
+      --faint: rgba(240,238,255,0.2);
+      --ok:    #86efac;
+      --err:   #f87171;
+      --warn:  #fbbf24;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 14px; min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .page { max-width: 820px; margin: 0 auto; padding: 32px 20px; }
+    h1 {
+      font-size: 24px; font-weight: 700;
+      letter-spacing: -0.03em; margin-bottom: 4px;
+    }
+    h1 span { color: var(--v); }
+    .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 28px; }
+    .card {
+      background: var(--surf); border: 1px solid var(--bord);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .card-title {
+      font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: var(--muted); margin-bottom: 14px;
+    }
+    .step-badge {
+      display: inline-block;
+      background: var(--v-dim); border: 1px solid var(--v);
+      color: var(--v); border-radius: 999px;
+      font-size: 11px; font-weight: 700;
+      padding: 1px 9px; margin-right: 8px;
+    }
+    .btn {
+      background: var(--v); border: none; border-radius: 8px;
+      color: #fff; font-size: 13px; font-weight: 600;
+      padding: 9px 20px; cursor: pointer;
+      transition: opacity 140ms, transform 140ms;
+    }
+    .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn:active { transform: none; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    .btn-ghost {
+      background: var(--surf2); border: 1px solid var(--bord);
+      color: var(--text);
+    }
+    .btn-ok { background: rgba(134,239,172,0.2); border: 1px solid var(--ok); color: var(--ok); }
+    .input {
+      width: 100%; background: var(--surf2); border: 1px solid var(--bord);
+      border-radius: 8px; color: var(--text); font-size: 13px;
+      padding: 8px 12px; outline: none;
+      transition: border-color 140ms;
+    }
+    .input:focus { border-color: var(--v); }
+    .input::placeholder { color: var(--faint); }
+    label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; }
+    .row { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+    .row .field { flex: 1; min-width: 180px; }
+    .progress-wrap {
+      background: var(--surf2); border-radius: 999px;
+      height: 6px; overflow: hidden; margin: 10px 0;
+    }
+    .progress-bar {
+      height: 100%; background: var(--v);
+      border-radius: 999px; width: 0%;
+      transition: width 300ms ease;
+    }
+    .log {
+      background: var(--surf2); border: 1px solid var(--bord);
+      border-radius: 8px; padding: 12px;
+      font-size: 12px; font-family: monospace;
+      color: var(--muted); height: 160px;
+      overflow-y: auto; line-height: 1.6;
+    }
+    .log .ok   { color: var(--ok); }
+    .log .err  { color: var(--err); }
+    .log .warn { color: var(--warn); }
+    .stats {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px; margin-top: 12px;
+    }
+    .stat {
+      background: var(--surf2); border: 1px solid var(--bord);
+      border-radius: 8px; padding: 12px; text-align: center;
+    }
+    .stat-val { font-size: 22px; font-weight: 700; color: var(--v); }
+    .stat-lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .tag {
+      background: var(--v-dim); border: 1px solid var(--v);
+      color: var(--v); border-radius: 6px;
+      font-size: 11px; padding: 2px 8px;
+    }
+    .alert {
+      padding: 10px 14px; border-radius: 8px;
+      font-size: 12px; margin-bottom: 12px;
+    }
+    .alert-info  { background: var(--v-dim); border: 1px solid var(--v); color: var(--v); }
+    .alert-ok    { background: rgba(134,239,172,0.1); border: 1px solid rgba(134,239,172,0.3); color: var(--ok); }
+    .alert-warn  { background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); color: var(--warn); }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <h1>🤝 Jestally <span>Model Training</span></h1>
+  <p class="subtitle">Extract hand landmarks from your ISL MP4 files and train the sign recognition model — runs entirely in your browser, zero cloud cost.</p>
+
+  <div class="alert alert-info">
+    ℹ This page processes your local MP4 files. Nothing is uploaded anywhere during training. Only the final model is uploaded to S3.
+  </div>
+
+  <!-- STEP 1: Load videos -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">1</span>Load ISL Videos</div>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:12px">
+      Select the folder containing your ISL MP4 files. File name = sign label (e.g. <code>Hello.mp4</code> → label <code>hello</code>).
+    </p>
+    <div class="row">
+      <div class="field">
+        <label for="video-folder">Select video files (select all MP4s)</label>
+        <input type="file" id="video-folder" accept="video/mp4" multiple class="input" />
+      </div>
+      <button class="btn btn-ghost" id="load-btn" disabled>Load Files</button>
+    </div>
+    <div class="stats" id="load-stats" style="display:none">
+      <div class="stat"><div class="stat-val" id="stat-files">0</div><div class="stat-lbl">Files</div></div>
+      <div class="stat"><div class="stat-val" id="stat-labels">0</div><div class="stat-lbl">Labels</div></div>
+    </div>
+    <div class="tag-list" id="label-tags"></div>
+  </div>
+
+  <!-- STEP 2: Extract landmarks -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">2</span>Extract Hand Landmarks</div>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:12px">
+      MediaPipe Hands processes each video frame-by-frame and extracts 21 hand landmarks (63 floats) per frame. This takes 2–5 minutes for 150 videos.
+    </p>
+    <div class="row" style="margin-bottom:12px">
+      <div class="field">
+        <label>Frames per video (more = better accuracy, slower)</label>
+        <select class="input" id="frames-per-video">
+          <option value="8">8 frames (fast)</option>
+          <option value="15" selected>15 frames (recommended)</option>
+          <option value="30">30 frames (slow, best accuracy)</option>
+        </select>
+      </div>
+      <button class="btn" id="extract-btn" disabled>Extract Landmarks</button>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="extract-progress"></div></div>
+    <div class="log" id="extract-log">Waiting to start…</div>
+    <div class="stats" id="extract-stats" style="display:none">
+      <div class="stat"><div class="stat-val" id="stat-samples">0</div><div class="stat-lbl">Samples</div></div>
+      <div class="stat"><div class="stat-val" id="stat-frames">0</div><div class="stat-lbl">Frames</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 3: Train model -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">3</span>Train TensorFlow.js Model</div>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:12px">
+      Trains a lightweight neural network on the extracted landmarks. Runs in WebGL — takes 1–3 minutes.
+    </p>
+    <div class="row" style="margin-bottom:12px">
+      <div class="field">
+        <label>Epochs</label>
+        <select class="input" id="epochs">
+          <option value="30">30 (fast test)</option>
+          <option value="60" selected>60 (recommended)</option>
+          <option value="100">100 (best accuracy)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Batch size</label>
+        <select class="input" id="batch-size">
+          <option value="16">16</option>
+          <option value="32" selected>32</option>
+          <option value="64">64</option>
+        </select>
+      </div>
+      <button class="btn" id="train-btn" disabled>Train Model</button>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" id="train-progress"></div></div>
+    <div class="log" id="train-log">Waiting to start…</div>
+    <div class="stats" id="train-stats" style="display:none">
+      <div class="stat"><div class="stat-val" id="stat-accuracy">—</div><div class="stat-lbl">Accuracy</div></div>
+      <div class="stat"><div class="stat-val" id="stat-loss">—</div><div class="stat-lbl">Final Loss</div></div>
+      <div class="stat"><div class="stat-val" id="stat-epoch">—</div><div class="stat-lbl">Epochs</div></div>
+    </div>
+  </div>
+
+  <!-- STEP 4: Export + Upload -->
+  <div class="card">
+    <div class="card-title"><span class="step-badge">4</span>Export Model &amp; Upload to S3</div>
+    <p style="font-size:12px; color:var(--muted); margin-bottom:12px">
+      Downloads the trained model files and the labels JSON. Upload both to your S3 bucket, then paste the model.json URL into the Jestally extension settings.
+    </p>
+    <div class="row" style="margin-bottom:12px">
+      <button class="btn btn-ok" id="download-model-btn" disabled>⬇ Download model.json + weights</button>
+      <button class="btn btn-ok" id="download-labels-btn" disabled>⬇ Download labels.json</button>
+    </div>
+    <div class="alert alert-warn" id="upload-instructions" style="display:none">
+      <strong>After downloading:</strong><br>
+      1. Run: <code>aws s3 cp model/ s3://jestally-isl-gifs-prod/model/ --recursive --region ap-south-1</code><br>
+      2. Run: <code>aws s3 cp labels.json s3://jestally-isl-gifs-prod/model/labels.json --region ap-south-1</code><br>
+      3. Paste this URL into the extension Model URL field:<br>
+      <code id="model-url-hint">https://jestally-isl-gifs-prod.s3.ap-south-1.amazonaws.com/model/model.json</code>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <div class="field">
+        <label>Or enter S3 bucket name to build the URL</label>
+        <input type="text" class="input" id="bucket-name" placeholder="jestally-isl-gifs-prod" value="jestally-isl-gifs-prod" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden video element for frame extraction -->
+  <video id="proc-video" style="display:none" crossorigin="anonymous" muted></video>
+  <canvas id="proc-canvas" style="display:none"></canvas>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.15.0/dist/tf.min.js" crossorigin="anonymous"></script>
+
+<script>
+'use strict';
+
+/* ── State ── */
+let videoFiles   = [];
+let labels       = [];
+let trainData    = { xs: [], ys: [] };
+let trainedModel = null;
+let handsMP      = null;
+
+/* ── Elements ── */
+const fileInput      = document.getElementById('video-folder');
+const loadBtn        = document.getElementById('load-btn');
+const extractBtn     = document.getElementById('extract-btn');
+const trainBtn       = document.getElementById('train-btn');
+const dlModelBtn     = document.getElementById('download-model-btn');
+const dlLabelsBtn    = document.getElementById('download-labels-btn');
+const extractLog     = document.getElementById('extract-log');
+const trainLog       = document.getElementById('train-log');
+const extractProg    = document.getElementById('extract-progress');
+const trainProg      = document.getElementById('train-progress');
+const uploadInstr    = document.getElementById('upload-instructions');
+
+/* ── File input ── */
+fileInput.addEventListener('change', () => {
+  loadBtn.disabled = fileInput.files.length === 0;
+});
+
+loadBtn.addEventListener('click', () => {
+  videoFiles = Array.from(fileInput.files).filter(f => f.name.endsWith('.mp4'));
+  labels = [...new Set(videoFiles.map(f => f.name.replace('.mp4','').toLowerCase()))].sort();
+
+  document.getElementById('stat-files').textContent  = videoFiles.length;
+  document.getElementById('stat-labels').textContent = labels.length;
+  document.getElementById('load-stats').style.display = 'grid';
+
+  const tagList = document.getElementById('label-tags');
+  tagList.innerHTML = labels.map(l => `<span class="tag">${l}</span>`).join('');
+
+  extractBtn.disabled = false;
+  log(extractLog, `Loaded ${videoFiles.length} videos with ${labels.length} labels.`, 'ok');
+});
+
+/* ── Extract landmarks ── */
+extractBtn.addEventListener('click', async () => {
+  extractBtn.disabled = true;
+  trainData = { xs: [], ys: [] };
+  extractLog.innerHTML = '';
+
+  const framesPerVideo = parseInt(document.getElementById('frames-per-video').value);
+
+  // Init MediaPipe Hands
+  log(extractLog, 'Loading MediaPipe Hands…');
+  handsMP = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+  handsMP.setOptions({
+    maxNumHands: 1,
+    modelComplexity: 1,
+    minDetectionConfidence: 0.5,
+    minTrackingConfidence: 0.5,
+  });
+
+  let totalSamples = 0;
+  let totalFrames  = 0;
+
+  for (let i = 0; i < videoFiles.length; i++) {
+    const file  = videoFiles[i];
+    const label = file.name.replace('.mp4','').toLowerCase();
+    const labelIdx = labels.indexOf(label);
+
+    log(extractLog, `[${i+1}/${videoFiles.length}] ${label}…`);
+    extractProg.style.width = ((i / videoFiles.length) * 100) + '%';
+
+    try {
+      const frames = await extractFrames(file, framesPerVideo);
+      for (const frameData of frames) {
+        const landmarks = await detectHands(frameData);
+        if (landmarks) {
+          trainData.xs.push(extractFeatures(landmarks));
+          trainData.ys.push(labelIdx);
+          totalSamples++;
+        }
+        totalFrames++;
+      }
+    } catch (e) {
+      log(extractLog, `  ⚠ ${label}: ${e.message}`, 'warn');
+    }
+  }
+
+  extractProg.style.width = '100%';
+  document.getElementById('stat-samples').textContent = totalSamples;
+  document.getElementById('stat-frames').textContent  = totalFrames;
+  document.getElementById('extract-stats').style.display = 'grid';
+
+  log(extractLog, `Done. ${totalSamples} samples from ${totalFrames} frames.`, 'ok');
+
+  if (totalSamples > 0) trainBtn.disabled = false;
+  else log(extractLog, 'No hand landmarks detected. Check your videos.', 'err');
+});
+
+/* ── Extract N frames from a video file ── */
+function extractFrames(file, n) {
+  return new Promise((resolve, reject) => {
+    const video  = document.getElementById('proc-video');
+    const canvas = document.getElementById('proc-canvas');
+    const ctx    = canvas.getContext('2d');
+    const url    = URL.createObjectURL(file);
+    const frames = [];
+
+    video.src = url;
+    video.addEventListener('loadedmetadata', () => {
+      canvas.width  = 320;
+      canvas.height = 240;
+      const duration = video.duration;
+      const times    = Array.from({ length: n }, (_, i) => (i + 0.5) * (duration / n));
+      let ti = 0;
+
+      function seekNext() {
+        if (ti >= times.length) {
+          URL.revokeObjectURL(url);
+          resolve(frames);
+          return;
+        }
+        video.currentTime = times[ti++];
+      }
+
+      video.addEventListener('seeked', () => {
+        ctx.drawImage(video, 0, 0, 320, 240);
+        frames.push(ctx.getImageData(0, 0, 320, 240));
+        seekNext();
+      });
+
+      seekNext();
+    });
+
+    video.addEventListener('error', () => reject(new Error('Video load failed')));
+  });
+}
+
+/* ── Detect hand landmarks from ImageData ── */
+function detectHands(imageData) {
+  return new Promise(resolve => {
+    const canvas = document.getElementById('proc-canvas');
+    const ctx    = canvas.getContext('2d');
+    ctx.putImageData(imageData, 0, 0);
+
+    let resolved = false;
+    handsMP.onResults(results => {
+      if (resolved) return;
+      resolved = true;
+      if (results.multiHandLandmarks?.length > 0) {
+        resolve(results.multiHandLandmarks[0]);
+      } else {
+        resolve(null);
+      }
+    });
+    handsMP.send({ image: canvas }).catch(() => resolve(null));
+  });
+}
+
+/* ── Extract 63 normalized features ── */
+function extractFeatures(landmarks) {
+  const wrist = landmarks[0];
+  return landmarks.flatMap(lm => [
+    lm.x - wrist.x,
+    lm.y - wrist.y,
+    lm.z - wrist.z,
+  ]);
+}
+
+/* ── Train model ── */
+trainBtn.addEventListener('click', async () => {
+  trainBtn.disabled = true;
+  trainLog.innerHTML = '';
+  document.getElementById('train-stats').style.display = 'none';
+
+  const epochs    = parseInt(document.getElementById('epochs').value);
+  const batchSize = parseInt(document.getElementById('batch-size').value);
+  const nClasses  = labels.length;
+  const nFeatures = 63;
+
+  log(trainLog, `Training: ${trainData.xs.length} samples, ${nClasses} classes, ${epochs} epochs`);
+
+  // Build tensors
+  const xs = tf.tensor2d(trainData.xs, [trainData.xs.length, nFeatures]);
+  const ys = tf.oneHot(tf.tensor1d(trainData.ys, 'int32'), nClasses);
+
+  // Build model: 63 → 256 → 128 → nClasses
+  const model = tf.sequential();
+  model.add(tf.layers.dense({ inputShape: [nFeatures], units: 256, activation: 'relu' }));
+  model.add(tf.layers.dropout({ rate: 0.3 }));
+  model.add(tf.layers.dense({ units: 128, activation: 'relu' }));
+  model.add(tf.layers.dropout({ rate: 0.2 }));
+  model.add(tf.layers.dense({ units: nClasses, activation: 'softmax' }));
+
+  model.compile({
+    optimizer: tf.train.adam(0.001),
+    loss:      'categoricalCrossentropy',
+    metrics:   ['accuracy'],
+  });
+
+  let lastAcc = 0, lastLoss = 0;
+
+  await model.fit(xs, ys, {
+    epochs,
+    batchSize,
+    validationSplit: 0.15,
+    shuffle:         true,
+    callbacks: {
+      onEpochEnd: (epoch, logs) => {
+        lastAcc  = logs.val_acc  ?? logs.acc;
+        lastLoss = logs.val_loss ?? logs.loss;
+        const pct = Math.round(((epoch + 1) / epochs) * 100);
+        trainProg.style.width = pct + '%';
+        if ((epoch + 1) % 10 === 0 || epoch === 0) {
+          log(trainLog, `Epoch ${epoch+1}/${epochs} — loss: ${lastLoss.toFixed(4)}, acc: ${(lastAcc*100).toFixed(1)}%`);
+        }
+      },
+    },
+  });
+
+  xs.dispose(); ys.dispose();
+  trainedModel = model;
+
+  document.getElementById('stat-accuracy').textContent = (lastAcc * 100).toFixed(1) + '%';
+  document.getElementById('stat-loss').textContent     = lastLoss.toFixed(4);
+  document.getElementById('stat-epoch').textContent    = epochs;
+  document.getElementById('train-stats').style.display = 'grid';
+
+  log(trainLog, `Training complete. Accuracy: ${(lastAcc*100).toFixed(1)}%`, 'ok');
+
+  dlModelBtn.disabled  = false;
+  dlLabelsBtn.disabled = false;
+  uploadInstr.style.display = 'block';
+
+  // Update model URL hint
+  const bucket = document.getElementById('bucket-name').value.trim() || 'jestally-isl-gifs-prod';
+  document.getElementById('model-url-hint').textContent =
+    `https://${bucket}.s3.ap-south-1.amazonaws.com/model/model.json`;
+});
+
+/* ── Download model ── */
+dlModelBtn.addEventListener('click', async () => {
+  if (!trainedModel) return;
+  await trainedModel.save('downloads://jestally-isl-model');
+  log(trainLog, 'Model downloaded. Upload the files to S3.', 'ok');
+});
+
+/* ── Download labels ── */
+dlLabelsBtn.addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(labels, null, 2)], { type: 'application/json' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'labels.json';
+  a.click();
+  log(trainLog, 'labels.json downloaded.', 'ok');
+});
+
+/* ── Log helper ── */
+function log(el, msg, type) {
+  const line = document.createElement('div');
+  line.className = type || '';
+  line.textContent = msg;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+</script>
+</body>
+</html>

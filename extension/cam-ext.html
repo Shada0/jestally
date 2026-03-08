@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Jestally Cam</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#0f0d1a;width:320px;height:240px;overflow:hidden;position:relative;}
+    #vid{position:absolute;top:0;left:0;width:320px;height:240px;object-fit:cover;display:none;transform:scaleX(-1);}
+    #cvs{position:absolute;top:0;left:0;width:320px;height:240px;display:none;transform:scaleX(-1);}
+    #loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:#0f0d1a;}
+    .spinner{width:32px;height:32px;border:3px solid rgba(167,139,250,0.2);border-top-color:#a78bfa;border-radius:50%;animation:spin 0.8s linear infinite;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    #ltxt{color:#a78bfa;font-family:system-ui,sans-serif;font-size:12px;text-align:center;padding:0 16px;}
+    #status{position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:11px;color:rgba(196,181,253,0.8);font-family:system-ui,sans-serif;pointer-events:none;}
+  </style>
+</head>
+<body>
+  <video id="vid" autoplay muted playsinline></video>
+  <canvas id="cvs"></canvas>
+  <div id="loader"><div class="spinner"></div><div id="ltxt">Starting camera…</div></div>
+  <div id="status"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+  <script>
+    const vid=document.getElementById('vid'), cvs=document.getElementById('cvs');
+    const ctx=cvs.getContext('2d'), loader=document.getElementById('loader');
+    const ltxt=document.getElementById('ltxt'), statusEl=document.getElementById('status');
+    const SEQ=30, MIN=15;
+    let buf=[], stream=null, mp=null, raf=null, active=false;
+    const EDGES=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],[0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17]];
+
+    const setL=m=>{if(ltxt)ltxt.textContent=m;if(loader)loader.style.display=m?'flex':'none';};
+    const setS=m=>{if(statusEl)statusEl.textContent=m;};
+    const post=m=>window.parent.postMessage(m,'*');
+
+    function drawHand(lm){
+      const W=cvs.width,H=cvs.height;
+      ctx.strokeStyle='rgba(167,139,250,0.85)';ctx.lineWidth=1.5;
+      EDGES.forEach(([a,b])=>{ctx.beginPath();ctx.moveTo(lm[a].x*W,lm[a].y*H);ctx.lineTo(lm[b].x*W,lm[b].y*H);ctx.stroke();});
+      ctx.fillStyle='#a78bfa';
+      lm.forEach(p=>{ctx.beginPath();ctx.arc(p.x*W,p.y*H,3,0,Math.PI*2);ctx.fill();});
+    }
+
+    function pickDom(hands){
+      if(hands.length===1)return hands[0];
+      const area=lm=>{const xs=lm.map(p=>p.x),ys=lm.map(p=>p.y);return(Math.max(...xs)-Math.min(...xs))*(Math.max(...ys)-Math.min(...ys));};
+      return area(hands[0])>=area(hands[1])?hands[0]:hands[1];
+    }
+
+    function onResults(r){
+      const W=vid.videoWidth||320,H=vid.videoHeight||240;
+      cvs.width=W;cvs.height=H;ctx.clearRect(0,0,W,H);
+      if(!r.multiHandLandmarks?.length){setS('Show your hand…');return;}
+      r.multiHandLandmarks.forEach(lm=>drawHand(lm));
+      const dom=pickDom(r.multiHandLandmarks),w0=dom[0];
+      const frame=dom.flatMap(p=>[p.x-w0.x,p.y-w0.y,p.z-w0.z]);
+      buf.push(frame);if(buf.length>SEQ)buf.shift();
+      setS(buf.length<MIN?`Buffering… ${Math.round(buf.length/MIN*100)}%`:'Hand detected ✓');
+      post({type:'FRAME_DATA',buffer:buf.slice(),ready:buf.length>=MIN});
+    }
+
+    function loop(){if(!active)return;if(mp&&vid.readyState>=2)mp.send({image:vid}).catch(()=>{});raf=requestAnimationFrame(loop);}
+
+    async function startCamera(){
+      setL('Requesting camera…');
+      try{
+        stream=await navigator.mediaDevices.getUserMedia({video:{width:320,height:240,facingMode:'user'}});
+        vid.srcObject=stream;
+        await new Promise(r=>{vid.onloadedmetadata=r;});
+        await vid.play();
+      }catch(e){setL('Camera error: '+e.message);post({type:'CAM_ERROR',error:e.message});return;}
+
+      setL('Loading hand detection…');
+      let w=0;
+      while(typeof Hands==='undefined'&&w<8000){await new Promise(r=>setTimeout(r,100));w+=100;}
+      if(typeof Hands==='undefined'){setL('MediaPipe failed');post({type:'CAM_ERROR',error:'Hands CDN failed'});return;}
+
+      try{
+        mp=new Hands({locateFile:f=>`https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}`});
+        mp.setOptions({maxNumHands:2,modelComplexity:1,minDetectionConfidence:0.5,minTrackingConfidence:0.5});
+        mp.onResults(onResults);
+        setL('Initializing model…');
+        await mp.initialize();
+      }catch(e){setL('Init error: '+e.message);post({type:'CAM_ERROR',error:e.message});return;}
+
+      loader.style.display='none';vid.style.display='block';cvs.style.display='block';
+      active=true;loop();setS('Show your hand…');post({type:'CAM_READY'});
+    }
+
+    function stopCamera(){
+      active=false;if(raf)cancelAnimationFrame(raf);
+      stream?.getTracks().forEach(t=>t.stop());vid.srcObject=null;buf=[];
+      setL('');setS('');post({type:'CAM_STOPPED'});
+    }
+
+    window.addEventListener('message',e=>{
+      if(e.data?.type==='STOP_CAM') stopCamera();
+    });
+
+    startCamera();
+  </script>
+</body>
+</html>

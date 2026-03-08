@@ -1,0 +1,23 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+
+# ML models
+*.tar.gz
+*.task
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Large datasets
+data/
+model_output/
+
+# AWS credentials
+key.json
+aws
