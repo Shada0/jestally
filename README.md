@@ -53,7 +53,7 @@ This is **India's first open, bidirectional, AI-powered ISL browser extension** 
 
 ### 🧠 AI & Machine Learning
 - Custom **LSTM sequence model** trained on 30-frame hand landmark sequences
-- **142 ISL classes** covering common words, alphabets, and phrases
+- **151 ISL classes** covering common words, alphabets, and phrases
 - Deployed on **AWS SageMaker** (ml.c5.large) with millisecond inference
 - **MediaPipe Hands** for real-time 21-point 3D landmark extraction at 30fps
 - Confidence thresholding (≥55%) to suppress false positives
@@ -117,7 +117,7 @@ This is **India's first open, bidirectional, AI-powered ISL browser extension** 
 │    ┌───────▼──────┐   │  Endpoint           │          │
 │    │  S3 +        │   │  (LSTM Model)       │          │
 │    │  CloudFront  │   │  ml.c5.large        │          │
-│    │  (GIF/MP4    │   │  142 ISL classes    │          │
+│    │  (GIF/MP4    │   │  151 ISL classes    │          │
 │    │   assets)    │   └─────────────────────┘          │
 │    └──────────────┘                                     │
 └─────────────────────────────────────────────────────────┘
@@ -147,7 +147,7 @@ CLIENT SIDE (Extension / Browser)
 |---|---|
 | Architecture | LSTM (sequence classifier) |
 | Input | 30 frames × 63 features (21 landmarks × xyz, wrist-normalized) |
-| Output | 142 ISL class probabilities |
+| Output | 151 ISL class probabilities |
 | Training data | 15,200 rows × 64 cols, 100–200 samples/class |
 | Confidence threshold | 55% |
 | Inference latency | ~200ms (SageMaker warm) |
@@ -280,7 +280,7 @@ Add-Content hands.js "`nwindow.Hands = Hands;"
 | Extension | Chrome MV3, Offscreen Documents API |
 | Frontend | Vanilla JS, HTML5, CSS3 |
 | Hand Tracking | MediaPipe Hands (21-point 3D landmarks) |
-| AI Model | LSTM (custom trained, 142 classes) |
+| AI Model | LSTM (custom trained, 151 classes) |
 | Model Hosting | AWS SageMaker (ml.c5.large) |
 | API | AWS API Gateway + Lambda (Python 3.11) |
 | Storage | AWS S3 + CloudFront |
@@ -297,7 +297,7 @@ Add-Content hands.js "`nwindow.Hands = Hands;"
 - [x] 10-language support with real-time translation
 - [x] ISL grammar engine with token reordering
 - [x] Chrome Extension (MV3) with floating panel
-- [x] AWS SageMaker LSTM inference (142 classes)
+- [x] AWS SageMaker LSTM inference (151 classes)
 - [x] MediaPipe landmark extraction via Offscreen Document API
 
 ### 🔜 Near-term
