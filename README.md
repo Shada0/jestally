@@ -1,398 +1,234 @@
-<div align="center">
+# Jestally — Ally Without Limits
 
-<img src="web/logo.png" alt="Jestally Logo" width="120" />
+> **AI4Bharat Hackathon 2026** · Indian Sign Language AI Platform · Powered by AWS
 
-# 🤝 Jestally
-
-### India's First Bidirectional AI-Powered Indian Sign Language Bridge
-
-**Speak to Signs. Signs to Speech. Everywhere on the Web.**
-
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-dl1agc4y4ofy6.cloudfront.net-a78bfa?style=for-the-badge)](https://dl1agc4y4ofy6.cloudfront.net)
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Shada0%2Fjestally-181717?style=for-the-badge&logo=github)](https://github.com/Shada0/jestally)
-[![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)](LICENSE)
-[![Chrome Extension](https://img.shields.io/badge/Chrome-Extension-4285F4?style=for-the-badge&logo=googlechrome&logoColor=white)](#-chrome-extension-installation)
-[![AWS](https://img.shields.io/badge/AWS-SageMaker_+_Lambda-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](#-ai--cloud-architecture)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-CloudFront-FF9900?style=flat&logo=amazon-aws)](https://dl1agc4y4ofy6.cloudfront.net)
+[![GitHub](https://img.shields.io/badge/GitHub-Shada0%2Fjestally-181717?style=flat&logo=github)](https://github.com/Shada0/jestally)
+[![Extension](https://img.shields.io/badge/Chrome%20Extension-Download-4285F4?style=flat&logo=google-chrome)](https://github.com/Shada0/jestally/releases/latest/download/jestally-extension.zip)
+[![AWS](https://img.shields.io/badge/AWS-ap--south--1-FF9900?style=flat)](https://aws.amazon.com)
 
 ---
 
-*Jestally bridges the communication gap between the Deaf/HoH community and the rest of the world — directly inside your browser, on any website, in real time.*
+## The Problem
 
-</div>
+India has **63 million deaf and hard-of-hearing citizens** — yet there is no accessible, scalable tool to bridge communication between them and the hearing world. Education, healthcare, employment, and daily interaction remain out of reach for millions.
 
----
+## The Solution
 
-## 🎯 What Is Jestally?
+Jestally is a **fully serverless, AWS-native platform** that bridges spoken language and Indian Sign Language in real time — in both directions:
 
-Jestally is a **bidirectional Indian Sign Language (ISL) communication platform** built as a Chrome Extension and Web App. It works on **every website simultaneously** — no app switching, no uploads, no friction.
+- **Speech / Text → ISL** — Speak or type in any of 22 Indian languages. Jestally reorders your input into correct ISL grammar using AI, then plays the full sign sequence as animated MP4 videos.
+- **ISL → Speech** — Show a hand sign to the camera. Jestally classifies it using a TensorFlow model on SageMaker and speaks the result in your chosen Indian language.
 
-- **ISL Out** — Type or speak in any of 10 Indian languages → Jestally applies ISL grammar rules, translates, and plays the correct sign GIF/video in a floating panel.
-- **ISL In** — Show a hand sign to your webcam → MediaPipe detects your landmarks → a custom LSTM model on AWS SageMaker classifies the gesture → the result is spoken aloud in your chosen language.
-
-This is **India's first open, bidirectional, AI-powered ISL browser extension** — no app install, no sign-in, just open a page and communicate.
+No downloads. No plugins. No servers to manage. Works in any browser.
 
 ---
 
-## 🎬 Demo
+## Live Demo
 
-> **[▶ Try the live web app →](https://dl1agc4y4ofy6.cloudfront.net)**
-
-| ISL Output (Text/Speech → Sign) | ISL Input (Sign → Speech) |
+| Resource | Link |
 |---|---|
-| ![ISL Out Demo](docs/isl-out-demo.gif) | ![ISL In Demo](docs/isl-in-demo.gif) |
-
-*The floating Jestally panel works on every website — Wikipedia, Google, Gmail, anywhere.*
-
----
-
-## ✨ Features
-
-### 🔁 Bidirectional Communication
-- **Text/Speech → ISL Signs** with animated GIF/MP4 output
-- **Webcam Signs → Spoken Text** via real-time AI inference
-
-### 🧠 AI & Machine Learning
-- Custom **LSTM sequence model** trained on 30-frame hand landmark sequences
-- **151 ISL classes** covering common words, alphabets, and phrases
-- Deployed on **AWS SageMaker** (ml.c5.large) with millisecond inference
-- **MediaPipe Hands** for real-time 21-point 3D landmark extraction at 30fps
-- Confidence thresholding (≥55%) to suppress false positives
-- Frame buffering with augmentation for robust sequence classification
-
-### 🏛️ ISL Grammar Engine
-- Built-in **ISL grammar transformer** — English follows Subject-Verb-Object; ISL follows Topic-Comment with time expressions first
-- Automatically reorders tokens: `[TIME] → [SUBJECT] → [OBJECT] → [NEGATION] → [WH-WORD]`
-- Drops grammatically-silent words (articles, copulas, auxiliary verbs)
-- Sign alias dictionary maps common phrases (`"thank you"`, `"bye"`) to canonical ISL signs
-
-### 🌐 Multilingual
-- **10 Indian languages** — Hindi, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Bengali, Punjabi, English
-- Auto-translation via MyMemory API with strict validation (rejects gibberish, error strings, oversized responses)
-- TTS output in native language using Web Speech API with regional voice selection
-- Retry logic with fallback to English — never speaks garbage
-
-### 🔌 Chrome Extension (MV3)
-- Works on **every website** as a floating, draggable, resizable panel
-- Three panel sizes (S/M/L), minimisable, toggle on/off
-- GIF/MP4 sign player with progress dots and loop control
-- Text input + Speech recognition (where browser permits)
-- Zero-config: API keys baked in, works immediately on install
-
-### ☁️ Serverless Cloud Backend
-- **AWS API Gateway + Lambda** for sign lookup (`/resolve`) and gesture recognition (`/recognize`)
-- **AWS SageMaker** endpoint for LSTM inference
-- **S3 + CloudFront** for ISL sign GIF/MP4 asset delivery
-- Training pipeline: CSV landmarks → augmented 30-frame sequences → SageMaker training job
+| 🌐 Web Application | https://dl1agc4y4ofy6.cloudfront.net |
+| 🧩 Chrome Extension | [Download jestally-extension.zip](https://github.com/Shada0/jestally/releases/latest/download/jestally-extension.zip) |
+| 📁 GitHub Repository | https://github.com/Shada0/jestally |
 
 ---
 
-## 🏗️ AI & Cloud Architecture
+## Features
+
+### Speech & Text → ISL Translation
+- Voice input in 22 Indian languages via Web Speech API
+- Input translation to English via Google Translate free endpoint
+- AI ISL grammar reordering via Amazon Bedrock (Claude Haiku 3) — TIME first, Topic-Comment structure, WH-last
+- Lemmatization — inflected forms reduced to root signs (seeing→see, going→go)
+- Phrase-first resolution — multi-word expressions matched before individual words (4-gram → 3-gram → 2-gram → word)
+- 151 ISL signs — letters A–Z, numbers 0–9, common vocabulary
+- Animated MP4 sign videos served directly from S3
+
+### Real-Time Sign Recognition
+- On-device hand tracking via MediaPipe — 21-point skeleton, zero video leaves browser
+- 30-frame skeletal sequences sent as 63-float vectors to AWS
+- TensorFlow model on SageMaker classifies 151 ISL signs
+- Top-3 predictions with confidence scores
+- Multilingual TTS via ResponsiveVoice — speaks recognized signs in chosen Indian language
+
+### Chrome Extension
+- Manifest V3 Chrome extension
+- Live ISL overlay inside Google Meet and Zoom
+- No tab switching, no performance impact on the call
+
+### Language Support
+22 constitutionally scheduled Indian languages including Hindi, Tamil, Telugu, Kannada, Malayalam, Bengali, Marathi, Gujarati, Punjabi, Urdu and more.
+
+---
+
+## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────┐
-│                    JESTALLY SYSTEM                      │
-│                                                         │
-│  ┌──────────────┐        ┌──────────────────────────┐  │
-│  │  Chrome      │        │     Web App              │  │
-│  │  Extension   │        │  dl1agc4y4ofy6.cloudfront.net    │  │
-│  │  (MV3)       │        │                          │  │
-│  └──────┬───────┘        └────────────┬─────────────┘  │
-│         │                             │                 │
-│         └──────────┬──────────────────┘                 │
-│                    │ HTTPS + API Key                    │
-│         ┌──────────▼──────────────────────┐            │
-│         │      AWS API Gateway            │            │
-│         │   /resolve      /recognize      │            │
-│         └──────┬────────────────┬─────────┘            │
-│                │                │                       │
-│    ┌───────────▼──┐   ┌─────────▼──────────┐          │
-│    │  Lambda      │   │  Lambda             │          │
-│    │  resolve     │   │  recognize_v3       │          │
-│    │  (sign       │   │  (sequence →        │          │
-│    │   lookup +   │   │   SageMaker)        │          │
-│    │   S3 GIF     │   └─────────┬───────────┘          │
-│    │   URLs)      │             │                       │
-│    └───────┬──────┘   ┌─────────▼──────────┐          │
-│            │          │  SageMaker          │          │
-│    ┌───────▼──────┐   │  Endpoint           │          │
-│    │  S3 +        │   │  (LSTM Model)       │          │
-│    │  CloudFront  │   │  ml.c5.large        │          │
-│    │  (GIF/MP4    │   │  151 ISL classes    │          │
-│    │   assets)    │   └─────────────────────┘          │
-│    └──────────────┘                                     │
-└─────────────────────────────────────────────────────────┘
-
-CLIENT SIDE (Extension / Browser)
-┌─────────────────────────────────────────────────────────┐
-│                                                         │
-│  Webcam → MediaPipe Hands → 21 × 3D landmarks          │
-│       → Frame buffer (30 frames)                        │
-│       → Normalize relative to wrist                     │
-│       → 63-feature vector × 30 frames                   │
-│       → POST /recognize → SageMaker LSTM                │
-│       → Predicted sign + confidence                     │
-│       → Web Speech API (TTS in selected language)       │
-│                                                         │
-│  Text/Speech → ISL Grammar Engine                       │
-│       → Translate to English (MyMemory API)             │
-│       → Tokenize + reorder (ISL grammar rules)          │
-│       → POST /resolve → Lambda → S3 GIF URLs            │
-│       → GIF/MP4 player in floating panel                │
-└─────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                        CLIENT LAYER                             │
+│   Web App (CloudFront)          Chrome Extension (MV3)         │
+│   Web Speech API                Google Meet · Zoom overlay     │
+│   MediaPipe Hands (on-device)   ResponsiveVoice TTS            │
+└──────────────────────┬──────────────────────────────────────────┘
+                       │  HTTPS · REST · x-api-key
+┌──────────────────────▼──────────────────────────────────────────┐
+│                     AWS API GATEWAY                             │
+│              /resolve (POST)  ·  /recognize (POST)             │
+└───────────┬─────────────────────────────┬───────────────────────┘
+            │                             │
+┌───────────▼──────────┐      ┌───────────▼──────────────────────┐
+│  Lambda: Resolver    │      │  Lambda: Recognizer              │
+│  Node.js 20.x        │      │  SageMaker TF Serving            │
+│                      │      │  151-class ISL model             │
+│  1. normalizeText    │      │  30 frames × 63 floats input     │
+│  2. Bedrock Haiku 3  │      │  sign + confidence + top3 output │
+│     ISL grammar      │      └──────────────────────────────────┘
+│  3. lemmatize        │
+│  4. DynamoDB lookup  │
+│  5. return gifs[]    │
+└───────────┬──────────┘
+            │
+┌───────────▼─────────────────────────────────────────────────────┐
+│                    AWS DATA & AI LAYER                          │
+│  DynamoDB: jestally-isl-dictionary-prod                        │
+│  S3: jestally-isl-gifs-prod  — 151 MP4 sign videos            │
+│  S3: jestally-app            — web app (CloudFront origin)     │
+│  Amazon Bedrock  — Claude Haiku 3 (ISL grammar)               │
+│  Amazon SageMaker — TF Serving (sign classification)          │
+│  Amazon Translate — one-time seed of sign labels × 15 langs   │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
-### Model Details
+---
 
-| Property | Value |
+## AWS Services
+
+| Service | Purpose |
 |---|---|
-| Architecture | LSTM (sequence classifier) |
-| Input | 30 frames × 63 features (21 landmarks × xyz, wrist-normalized) |
-| Output | 151 ISL class probabilities |
-| Training data | 15,200 rows × 64 cols, 100–200 samples/class |
-| Confidence threshold | 55% |
-| Inference latency | ~200ms (SageMaker warm) |
-| Hosting | AWS SageMaker `ml.c5.large` |
-| Serving | AWS Lambda → API Gateway |
+| **Amazon CloudFront** | Global CDN — serves web app and extension UI |
+| **Amazon S3** | Hosts web app, 151 ISL sign MP4 videos, ML model weights |
+| **Amazon API Gateway** | REST API — API key auth, CORS, rate limiting |
+| **AWS Lambda** | ISL resolver + sign recognizer (Node.js 20.x) |
+| **Amazon DynamoDB** | ISL dictionary — phrase lookup with multilingual labels |
+| **Amazon Bedrock** | Claude Haiku 3 — real-time ISL grammar reordering |
+| **Amazon SageMaker** | TF Serving — 151-class sign classification |
+| **Amazon Translate** | One-time seed — 165 sign labels × 15 Indian languages |
+| **AWS IAM** | Least-privilege roles per service boundary |
+| **Amazon CloudWatch** | Lambda logs, error monitoring |
 
 ---
 
-## 📁 Project Structure
+## ISL Resolver Pipeline
 
 ```
-jestally/
-├── extension/                  # Chrome MV3 Extension
-│   ├── manifest.json           # Extension manifest
-│   ├── background.js           # Service worker (offscreen mgmt)
-│   ├── content.js              # Injected panel + ISL pipeline
-│   ├── offscreen.html/.js      # MediaPipe camera (CSP-isolated)
-│   ├── panel.css               # Floating panel styles
-│   ├── popup.html/.js          # Extension popup
-│   ├── hands.js                # MediaPipe Hands (local bundle)
-│   ├── hands_solution_*.js     # MediaPipe WASM support
-│   ├── hands_solution_*.wasm   # WebAssembly binaries
-│   ├── hand_landmark_*.tflite  # TFLite hand models
-│   └── icons/                  # Extension icons
-│
-├── web/                        # Web App (AWS CloudFront)
-│   ├── index.html              # Main app (ISL Out + ISL In)
-│   ├── cam-ext.html            # Camera page
-│   └── logo.png
-│
-├── lambda/
-│   ├── recognize_v3.py         # Recognize Lambda handler
-│   └── resolve.py              # Sign lookup Lambda handler
-│
-├── training/
-│   ├── isl_landmarks.csv       # Raw landmark training data
-│   ├── csv_to_sequences.py     # CSV → 30-frame sequences
-│   └── train.py                # SageMaker training script
-│
-└── README.md
+POST /resolve { text, language }
+        ↓
+1. normalizeText()      — expand contractions, strip punctuation
+2. applyISLGrammar()    — Amazon Bedrock Claude Haiku 3
+                          TIME first · Topic-Comment · WH last
+3. lemmatizeTokens()    — seeing→see · going→go · am→be
+4. resolveSequence()    — DynamoDB 4-gram → 3-gram → 2-gram → word
+5. pickLabel()          — translated_label per active language
+        ↓
+Response: {
+  success, input, islOrdered, lemmatized, resolvedCount,
+  gifs: [{ token, url, type, priority, translated_label, translated_labels }]
+}
 ```
 
 ---
 
-## 🚀 Installation
+## Tech Stack
 
-### Web App
+**Frontend:** Vanilla HTML/CSS/JS · MediaPipe Hands · Web Speech API · Google Translate (input) · ResponsiveVoice TTS · Chrome Extension MV3
 
-The web app is live at **[dl1agc4y4ofy6.cloudfront.net](https://dl1agc4y4ofy6.cloudfront.net)** — no install needed.
+**Backend:** Node.js 20.x on AWS Lambda · AWS SDK v3 · Amazon Bedrock `apac.anthropic.claude-3-haiku-20240307-v1:0` · Custom lemmatizer · Phrase-first n-gram resolver
 
-To run locally:
+**ML:** TensorFlow/Keras sequence classifier · 30 frames × 63 floats input · Amazon SageMaker TF Serving
 
-```bash
-git clone https://github.com/Shada0/jestally.git
-cd jestally/web
-# Just open index.html in Chrome — no build step required
-open index.html
+---
+
+## DynamoDB Schema
+
+```json
+{
+  "phrase": "thank you",
+  "gif_url": "https://jestally-isl-gifs-prod.s3.ap-south-1.amazonaws.com/training-videos/Thank_You.mp4",
+  "language": "ISL",
+  "type": "phrase",
+  "priority": 1,
+  "translated_labels": {
+    "en": "thank you", "hi": "धन्यवाद", "ta": "நன்றி",
+    "te": "ధన్యవాదాలు", "kn": "ಧನ್ಯವಾದ", "ml": "നന്ദി",
+    "bn": "ধন্যবাদ", "mr": "धन्यवाद", "gu": "આભાર",
+    "pa": "ਧੰਨਵਾਦ", "ur": "شکریہ"
+  }
+}
 ```
 
 ---
 
-### 🔌 Chrome Extension Installation
+## Chrome Extension Setup
 
-> The extension is not yet on the Chrome Web Store. Install it manually in Developer Mode.
+1. Download [`jestally-extension.zip`](https://github.com/Shada0/jestally/releases/latest/download/jestally-extension.zip)
+2. Right-click → **Extract All**
+3. Open `chrome://extensions` → enable **Developer Mode**
+4. Click **Load unpacked** → select the `extension-v3` folder
+5. Pin from the Chrome toolbar puzzle icon 🧩
 
-**Step 1 — Clone the repo**
-```bash
-git clone https://github.com/Shada0/jestally.git
-cd jestally/extension
-```
-
-**Step 2 — Download MediaPipe assets** (required, ~25MB total)
-```powershell
-# Run in PowerShell inside the extension/ folder
-$version = "0.4.1646424915"
-$base = "https://cdn.jsdelivr.net/npm/@mediapipe/hands@$version"
-$files = @("hands.js","hands_solution_packed_assets_loader.js",
-           "hands_solution_simd_wasm_bin.js","hands_solution_simd_wasm_bin.wasm",
-           "hands_solution_wasm_bin.js","hands_solution_wasm_bin.wasm",
-           "hands_solution_packed_assets.data","hands.binarypb",
-           "hand_landmark_full.tflite","hand_landmark_lite.tflite")
-foreach ($f in $files) { Invoke-WebRequest "$base/$f" -OutFile $f }
-# Expose Hands constructor globally
-Add-Content hands.js "`nwindow.Hands = Hands;"
-```
-
-**Step 3 — Load in Chrome**
-1. Open `chrome://extensions`
-2. Enable **Developer mode** (top right)
-3. Click **Load unpacked**
-4. Select the `extension/` folder
-
-**Step 4 — Use it**
-- The Jestally panel appears on every page (bottom-right)
-- Toggle it on with the purple switch
-- ISL Out: type or speak → see signs
-- ISL In: click **Start Camera** → show a hand sign → hear the result
+Works inside **Google Meet** and **Zoom**.
 
 ---
 
-## 📖 Usage
+## Infrastructure
 
-### ISL Out (Text/Speech → Signs)
-
-1. Open any website
-2. Enable the Jestally panel
-3. Select your **input language** (e.g. Hindi)
-4. Type a sentence or click 🎤 to speak
-5. The panel translates to English → applies ISL grammar → plays the sign sequence
-
-### ISL In (Signs → Speech)
-
-1. Switch to the **👁 ISL In** tab
-2. Click **📷 Start Camera** — allow camera access
-3. Show an ISL hand sign to your webcam
-4. Jestally detects landmarks, runs AI inference, and **speaks the result** in your chosen language
-
-### Language Selection
-
-- Quick-select from top Indian languages (English, Hindi, Tamil, Telugu)
-- Dropdown for all 10 supported languages
-- Language applies to both speech input and TTS output
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
+| Resource | Value |
 |---|---|
-| Extension | Chrome MV3, Offscreen Documents API |
-| Frontend | Vanilla JS, HTML5, CSS3 |
-| Hand Tracking | MediaPipe Hands (21-point 3D landmarks) |
-| AI Model | LSTM (custom trained, 151 classes) |
-| Model Hosting | AWS SageMaker (ml.c5.large) |
-| API | AWS API Gateway + Lambda (Python 3.11) |
-| Storage | AWS S3 + CloudFront |
-| Translation | MyMemory API |
-| TTS | Web Speech API |
-| Web Hosting | AWS S3 + CloudFront |
+| Web App | https://dl1agc4y4ofy6.cloudfront.net |
+| Resolve API | https://ahwchrh9z0.execute-api.ap-south-1.amazonaws.com/prod/resolve |
+| Recognize API | https://6n5ur96sk6.execute-api.ap-south-1.amazonaws.com/prod/recognize |
+| DynamoDB Table | jestally-isl-dictionary-prod |
+| SageMaker Endpoint | jestally-isl-endpoint-prod |
+| AWS Region | ap-south-1 (Mumbai) |
 
 ---
 
-## 🗺️ Roadmap
+## Key Design Decisions
 
-### ✅ Completed
-- [x] Bidirectional ISL pipeline (text→sign, sign→text)
-- [x] 10-language support with real-time translation
-- [x] ISL grammar engine with token reordering
-- [x] Chrome Extension (MV3) with floating panel
-- [x] AWS SageMaker LSTM inference (151 classes)
-- [x] MediaPipe landmark extraction via Offscreen Document API
+**Seed-time translation:** Amazon Translate is called once per sign per language and stored in DynamoDB. Lambda never calls Translate at runtime — zero latency, zero cost per request.
 
-### 🔜 Near-term
-- [ ] **Chrome Web Store** public listing
-- [ ] Expand to **300+ ISL signs** with community data collection portal
-- [ ] **Two-hand gesture** support for complex compound signs
-- [ ] **Fingerspelling** (A–Z ISL alphabet) recognition
-- [ ] Offline mode with on-device TFLite inference (no cloud dependency)
-- [ ] **Firefox** extension port
-- [ ] Sentence-level gesture chunking and natural phrase grouping
-- [ ] Real-time **video call overlay** — Google Meet, Zoom, Teams
+**On-device hand tracking:** MediaPipe processes video locally. Only a 63-float vector per frame is sent to AWS — no video ever leaves the device.
 
-### 📡 Media & Broadcast Integration *(Long-term Vision)*
+**Phrase-first resolution:** Multi-word ISL expressions have distinct signs. 4-gram → 3-gram → 2-gram → word lookup ensures contextually accurate sequences.
 
-This is where Jestally's impact multiplies. The same bidirectional AI pipeline that works in a browser can be embedded as a **real-time ISL layer in broadcast media**:
-
-- **Live news channels** — ISL interpreter overlay generated automatically alongside the anchor, reducing cost of human interpreters while scaling availability
-- **YouTube & streaming platforms** — Auto-generated ISL sign track as a selectable caption track, similar to subtitles but in gesture video
-- **OTT platforms** (Netflix, Hotstar, Prime) — ISL sign avatar layer for all content on demand
-- **Government broadcasts & public announcements** — Mandatory accessibility compliance at scale
-- **Educational video platforms** — ISL-enabled lectures and course content automatically
-
-Currently, live ISL interpretation on Indian TV requires a human interpreter in the frame — expensive, inconsistent in quality, and unavailable for most channels. Jestally's AI pipeline can bring this to **every channel, every broadcast, at near-zero marginal cost**.
-
-The architecture for this already exists in our system — the same Lambda + SageMaker inference engine that powers the extension can be exposed as a **streaming API** that media platforms call frame-by-frame.
-
-### 📱 Platform Expansion
-- [ ] **Android app** — same bidirectional pipeline, native camera access
-- [ ] **iOS app** — Safari extension equivalent
-- [ ] **Enterprise SDK** — embeddable widget for any web platform
-- [ ] **API-as-a-Service** — public ISL inference API for third-party developers
+**Bedrock for grammar:** ISL has SOV word order, topic-comment structure, time-first, WH-last — fundamentally different from English. Claude Haiku handles novel sentences at ~300ms with zero infrastructure.
 
 ---
 
-## 🌍 Impact
+## Impact
 
-Communication is something most of us take for granted. We speak, type, and interact effortlessly through digital platforms every day. But for millions in the Deaf and hard-of-hearing community, communication works differently — Indian Sign Language is their *first* language, yet almost no digital system was designed with it in mind.
-
-Jestally addresses this gap directly. Not by asking the Deaf community to adapt to existing interfaces — but by making existing interfaces adapt to them.
-
-India has an estimated **1.8 million Deaf individuals** and a severe shortage of ISL interpreters. The technology to bridge this gap already exists. What was missing was the interface.
-
-| Problem | Jestally's Answer |
+| | |
 |---|---|
-| No ISL support on any website | Chrome Extension works on **every** website |
-| Interpreter shortage | AI inference available 24/7, no human needed |
-| English-only digital systems | 10 Indian languages supported |
-| Expensive assistive hardware | Works on any laptop webcam |
-| App install friction | No install — open a page and communicate |
-
-Jestally is built to be **open, accessible, and extensible** — so the community can grow the sign vocabulary and improve the model over time. Because communication should never exclude anyone.
-
----
-
-## 🤝 Contributing
-
-Contributions are very welcome — especially:
-
-- New ISL landmark training data
-- UI/UX improvements to the panel
-- Additional language support
-- Model architecture experiments
-- Bug fixes and documentation
-
-```bash
-# Fork the repo, then:
-git clone https://github.com/YOUR_USERNAME/jestally.git
-cd jestally
-git checkout -b feature/your-feature
-# Make changes, commit, and open a PR
-```
-
-Please open an issue before starting large changes so we can discuss the approach.
+| Target population | 63 million deaf/HoH in India |
+| Languages supported | 22 scheduled Indian languages |
+| ISL signs | 151 |
+| Infrastructure cost at idle | $0 — fully serverless |
+| Inference latency | < 100ms |
+| Setup required | None — works in any browser |
 
 ---
 
-## 🙏 Acknowledgements
+## Roadmap
 
-- [MediaPipe](https://mediapipe.dev/) — Google's real-time hand landmark detection
-- [MyMemory](https://mymemory.translated.net/) — Free translation API
-- [AWS](https://aws.amazon.com/) — SageMaker, Lambda, API Gateway, S3, CloudFront
-- The Indian Deaf community — for inspiring this work
+**v1.0 · Live** — Speech-to-ISL, real-time sign recognition, Chrome extension for Meet & Zoom
 
----
+**v2.0 · In Development** — WebSocket streaming, fingerspelling fallback
 
-## 📄 License
+**v3.0 · Upcoming** — ASL/BSL/JSL support, 3D signing avatars via WebGL
 
-MIT License — see [LICENSE](LICENSE) for details.
+**v4.0 · 2026** — Enterprise SDK, education institution portal
 
 ---
 
-<div align="center">
-
-Made with ❤️ for the Indian Deaf community
-
-**[🌐 Live Demo](https://dl1agc4y4ofy6.cloudfront.net)** · **[📦 GitHub](https://github.com/Shada0/jestally)** · **[🐛 Issues](https://github.com/Shada0/jestally/issues)**
-
-</div>
+*Built for AI4Bharat Hackathon 2026 · © 2026 Jestally · Powered by AWS ap-south-1*
