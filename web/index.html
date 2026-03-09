@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jestally – Ally Without Limits</title>
+  <meta name="description" content="Jestally bridges communication for the deaf and hard-of-hearing community with real-time Indian Sign Language recognition and translation — powered by AI." />
+  <script src="https://code.responsivevoice.org/responsivevoice.js?key=FREE"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:            #241f3f;
+      --bg-deep:       #1a1630;
+      --bg-surface:    rgba(255,255,255,0.05);
+      --bg-surface-2:  rgba(255,255,255,0.08);
+      --accent:        #a78bfa;
+      --accent-2:      #67e8f9;
+      --accent-warm:   #f0abfc;
+      --glow-purple:   rgba(167,139,250,0.25);
+      --glow-cyan:     rgba(103,232,249,0.2);
+      --text:          #f5f5f5;
+      --text-muted:    rgba(245,245,245,0.5);
+      --text-faint:    rgba(245,245,245,0.2);
+      --border:        rgba(255,255,255,0.1);
+      --border-accent: rgba(167,139,250,0.35);
+      --radius-sm:     8px;
+      --radius:        14px;
+      --radius-lg:     20px;
+      --ease:          cubic-bezier(0.4, 0, 0.2, 1);
+      --ease-spring:   cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse 100% 60% at 50% -10%, rgba(167,139,250,0.2) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 50% at 90% 80%,  rgba(103,232,249,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 40% at 5%  60%,  rgba(240,171,252,0.08) 0%, transparent 55%);
+      color: var(--text);
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; font-feature-settings: 'ss01', 'cv01';
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.4;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    }
+    h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; }
+    .container { max-width: 1180px; margin: 0 auto; padding: 0 24px; }
+    .glass {
+      background: var(--bg-surface);
+      backdrop-filter: blur(20px) saturate(160%);
+      -webkit-backdrop-filter: blur(20px) saturate(160%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .glass-accent {
+      border-color: var(--border-accent);
+      box-shadow: 0 0 30px var(--glow-purple), inset 0 1px 0 rgba(255,255,255,0.07);
+    }
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      padding: 16px 0;
+      background: rgba(36,31,63,0.75);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .nav-logo  { display: flex; align-items: center; gap: 12px; text-decoration: none; flex-shrink: 0; }
+    .nav-logo-mark {
+      width: 38px; height: 38px;
+      border-radius: 11px; display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 20px var(--glow-purple); flex-shrink: 0; overflow: hidden;
+    }
+    .nav-logo-mark img { width: 100%; height: 100%; object-fit: contain; }
+    .nav-brand {
+      font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 900; letter-spacing: -0.03em;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .nav-tagline { font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .nav-links   { display: flex; align-items: center; gap: 4px; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none; font-size: 13px;
+      padding: 7px 14px; border-radius: var(--radius-sm);
+      transition: color 200ms, background 200ms;
+    }
+    .nav-links a:hover { color: var(--text); background: var(--bg-surface); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2)) !important;
+      color: #1a1433 !important; font-weight: 600 !important;
+      padding: 8px 18px !important; display: inline-flex !important;
+      align-items: center; gap: 6px; border-radius: var(--radius-sm);
+      box-shadow: 0 0 16px var(--glow-purple); text-decoration: none;
+      transition: opacity 200ms, transform 200ms, box-shadow 200ms !important;
+      font-size: 13px;
+    }
+    .nav-cta:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 20px var(--glow-purple) !important; }
+    .nav-connected-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #1a1433; opacity: 0; transition: opacity 200ms;
+    }
+    .nav-connected-dot.on { opacity: 0.7; }
+    /* ── GLOBAL LANGUAGE PILL (NAV) ── */
+    .nav-lang-pill {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: var(--radius-sm);
+      background: var(--bg-surface-2); border: 1px solid var(--border);
+      transition: border-color 200ms, box-shadow 200ms; cursor: pointer; position: relative;
+    }
+    .nav-lang-pill:hover { border-color: var(--border-accent); box-shadow: 0 0 10px var(--glow-purple); }
+    .nav-lang-pill .flag { font-size: 15px; line-height: 1; }
+    .nav-lang-pill select {
+      background: transparent; border: none; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; outline: none; appearance: none; padding-right: 14px;
+      min-width: 60px;
+    }
+    .nav-lang-pill select option { background: #1a1630; color: var(--text); }
+    .nav-lang-pill .chevron {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      font-size: 8px; color: var(--text-muted); pointer-events: none;
+    }
+    /* ── HERO ── */
+    .hero { padding: 104px 0 80px; text-align: center; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 18px; border-radius: 30px;
+      background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);
+      font-size: 11px; color: var(--accent); letter-spacing: 0.08em;
+      text-transform: uppercase; font-weight: 600; margin-bottom: 36px;
+      animation: fadeUp 600ms var(--ease) both;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent); box-shadow: 0 0 8px var(--accent);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50%       { opacity: 0.4; transform: scale(1.7); }
+    }
+    .hero-title {
+      font-size: clamp(48px, 7vw, 90px); font-weight: 900;
+      line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 8px;
+      animation: fadeUp 600ms 100ms var(--ease) both;
+    }
+    .gradient-text {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 55%, var(--accent-warm) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 19px); color: var(--text-muted);
+      max-width: 600px; margin: 0 auto 48px; font-weight: 300; line-height: 1.65;
+      animation: fadeUp 600ms 180ms var(--ease) both;
+    }
+    .hero-ctas {
+      display: flex; align-items: center; justify-content: center;
+      gap: 12px; flex-wrap: wrap; animation: fadeUp 600ms 260ms var(--ease) both;
+    }
+    .hero-pillars {
+      display: flex; justify-content: center; gap: 0;
+      margin-top: 72px; padding-top: 44px; border-top: 1px solid var(--border);
+      flex-wrap: wrap; animation: fadeUp 600ms 340ms var(--ease) both;
+    }
+    .hero-pillar {
+      flex: 1; min-width: 160px; max-width: 220px;
+      padding: 0 32px; text-align: center; border-right: 1px solid var(--border);
+    }
+    .hero-pillar:last-child { border-right: none; }
+    .pillar-val {
+      font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      margin-bottom: 4px;
+    }
+    .pillar-lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.07em; }
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: var(--radius);
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; text-decoration: none; border: none;
+      transition: transform 250ms var(--ease), box-shadow 250ms var(--ease), opacity 250ms;
+      letter-spacing: 0.01em;
+    }
+    .btn:hover  { transform: translateY(-2px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: #1a1433; box-shadow: 0 4px 24px var(--glow-purple);
+    }
+    .btn-primary:hover { box-shadow: 0 8px 32px var(--glow-purple); }
+    .btn-ghost {
+      background: var(--bg-surface); color: var(--text);
+      border: 1px solid var(--border); backdrop-filter: blur(10px);
+    }
+    .btn-ghost:hover { background: var(--bg-surface-2); border-color: var(--border-accent); }
+    /* ── SHARED ── */
+    .panel-label {
+      font-family: 'Outfit', sans-serif; font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted);
+      margin-bottom: 18px; display: flex; align-items: center; gap: 10px;
+    }
+    .panel-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .section-header { text-align: center; margin-bottom: 56px; }
+    .section-eyebrow { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); margin-bottom: 12px; font-weight: 600; }
+    .section-title   { font-size: clamp(28px, 4vw, 46px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 14px; }
+    .section-desc    { font-size: 15px; color: var(--text-muted); max-width: 520px; margin: 0 auto; font-weight: 300; line-height: 1.7; }
+    /* ── INLINE LANGUAGE BAR ── */
+    .lang-bar {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: var(--radius);
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .lang-bar-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-faint); flex-shrink: 0;
+    }
+    .lang-chips { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+    .lang-chip {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1px solid var(--border); color: var(--text-muted);
+      background: transparent; cursor: pointer; transition: all 180ms var(--ease);
+      white-space: nowrap;
+    }
+    .lang-chip:hover { border-color: var(--border-accent); color: var(--accent); background: rgba(167,139,250,0.08); }
+    .lang-chip.active {
+      background: linear-gradient(135deg, rgba(167,139,250,0.2), rgba(103,232,249,0.15));
+      border-color: var(--accent); color: var(--accent);
+      box-shadow: 0 0 8px rgba(167,139,250,0.2);
+    }
+    .lang-more-btn {
+      padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+      border: 1px dashed var(--border); color: var(--text-faint);
+      background: transparent; cursor: pointer; transition: all 180ms;
+      white-space: nowrap;
+    }
+    .lang-more-btn:hover { border-color: var(--border-accent); color: var(--text-muted); }
+    /* ── LANGUAGE DROPDOWN PANEL ── */
+    .lang-dropdown {
+      display: none; position: absolute; z-index: 50;
+      background: rgba(26,22,48,0.98); border: 1px solid var(--border-accent);
+      border-radius: var(--radius); padding: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 30px var(--glow-purple);
+      backdrop-filter: blur(20px); min-width: 320px;
+      top: calc(100% + 8px); left: 0;
+    }
+    .lang-dropdown.open { display: block; animation: fadeUp 150ms var(--ease) both; }
+    .lang-dropdown-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-faint); margin-bottom: 12px;
+    }
+    .lang-dropdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .lang-opt {
+      display: flex; align-items: center; gap: 6px;
+      padding: 7px 10px; border-radius: var(--radius-sm); cursor: pointer;
+      border: 1px solid transparent; transition: all 150ms;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .lang-opt:hover { background: var(--bg-surface-2); border-color: var(--border); color: var(--text); }
+    .lang-opt.selected { background: rgba(167,139,250,0.12); border-color: var(--border-accent); color: var(--accent); }
+    .lang-opt .lo-flag { font-size: 14px; }
+    .lang-opt .lo-name { font-weight: 600; font-size: 12px; }
+    .lang-opt .lo-native { font-size: 10px; color: var(--text-faint); }
+    /* ── ISL GRAMMAR PREVIEW STRIP ── */
+    .isl-grammar-strip {
+      display: none;
+      align-items: center; gap: 8px;
+      padding: 6px 12px; margin-bottom: 10px;
+      background: rgba(167,139,250,0.07);
+      border: 1px solid rgba(167,139,250,0.2);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+    }
+    .isl-grammar-strip.show { display: flex; animation: fadeUp 200ms var(--ease) both; }
+    .isl-grammar-label {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.12em; color: var(--accent); flex-shrink: 0;
+    }
+    .isl-grammar-text {
+      font-size: 12px; font-weight: 600; color: var(--text);
+      letter-spacing: 0.05em; white-space: nowrap;
+      overflow: hidden; text-overflow: ellipsis;
+    }
+    /* ── TRANSLATE DEMO ── */
+    .demo-section { padding: 36px 0 96px; }
+    .demo-grid    { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 768px) { .demo-grid { grid-template-columns: 1fr; } }
+    .input-panel  { padding: 28px; animation: fadeUp 600ms 400ms var(--ease) both; position: relative; }
+    .output-panel { padding: 28px; animation: fadeUp 600ms 500ms var(--ease) both; }
+    .speech-controls { display: flex; gap: 10px; margin-bottom: 14px; }
+    .mic-btn {
+      width: 52px; height: 52px; border-radius: 14px;
+      background: var(--bg-surface-2); border: 1px solid var(--border);
+      color: var(--text-muted); font-size: 22px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 250ms var(--ease); flex-shrink: 0;
+    }
+    .mic-btn:hover { border-color: var(--border-accent); color: var(--accent); box-shadow: 0 0 16px var(--glow-purple); }
+    .mic-btn.recording { background: rgba(167,139,250,0.15); border-color: var(--accent); color: var(--accent); animation: recPulse 1s infinite; }
+    @keyframes recPulse {
+      0%, 100% { box-shadow: 0 0 10px var(--glow-purple); }
+      50%       { box-shadow: 0 0 24px rgba(167,139,250,0.5); }
+    }
+    .text-input {
+      flex: 1; background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 14px;
+      resize: vertical; min-height: 52px; outline: none;
+      transition: border-color 200ms, box-shadow 200ms;
+    }
+    .text-input:focus { border-color: var(--border-accent); box-shadow: 0 0 0 3px var(--glow-purple); }
+    .text-input::placeholder { color: var(--text-faint); }
+    .translate-btn {
+      width: 100%; padding: 14px; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none; color: #1a1433;
+      font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700;
+      cursor: pointer; letter-spacing: 0.02em;
+      transition: transform 200ms var(--ease), box-shadow 200ms, opacity 200ms;
+      box-shadow: 0 4px 20px var(--glow-purple);
+    }
+    .translate-btn:hover     { transform: translateY(-2px); box-shadow: 0 8px 28px var(--glow-purple); }
+    .translate-btn:disabled  { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .settings-row { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .setting-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+    .mini-toggle {
+      width: 32px; height: 18px; background: rgba(255,255,255,0.1);
+      border-radius: 9px; position: relative; cursor: pointer; transition: background 200ms; border: none;
+    }
+    .mini-toggle.on { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+    .mini-toggle::after {
+      content: ''; position: absolute; top: 2px; left: 2px;
+      width: 14px; height: 14px; background: white; border-radius: 50%;
+      transition: transform 200ms var(--ease); box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    .mini-toggle.on::after { transform: translateX(14px); }
+    .avatar-stage {
+      background: rgba(0,0,0,0.3); border-radius: var(--radius);
+      height: 220px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      margin-bottom: 16px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.06); position: relative;
+    }
+    .listening-state { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .wave-viz { display: flex; align-items: flex-end; gap: 5px; height: 40px; }
+    .wave-bar {
+      width: 5px; border-radius: 3px;
+      background: linear-gradient(180deg, var(--accent), var(--accent-2));
+      animation: wave 1.4s ease-in-out infinite; transform-origin: bottom;
+    }
+    .wave-bar:nth-child(1) { height: 14px; animation-delay: 0s; }
+    .wave-bar:nth-child(2) { height: 22px; animation-delay: .2s; }
+    .wave-bar:nth-child(3) { height: 35px; animation-delay: .4s; }
+    .wave-bar:nth-child(4) { height: 22px; animation-delay: .6s; }
+    .wave-bar:nth-child(5) { height: 14px; animation-delay: .8s; }
+    @keyframes wave {
+      0%, 100% { transform: scaleY(.35); opacity: .4; }
+      50%       { transform: scaleY(1);   opacity: 1; }
+    }
+    .listening-text { font-size: 13px; color: var(--text-muted); }
+    .loading-state  { display: none; flex-direction: column; align-items: center; gap: 14px; }
+    .shimmer-block {
+      width: 140px; height: 110px; border-radius: 10px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 0%, rgba(167,139,250,.1) 50%, rgba(255,255,255,0.03) 100%);
+      background-size: 200% 100%; animation: shimmer 1.6s infinite;
+    }
+    @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+    .gif-display { display: none; width: 100%; max-height: 210px; object-fit: contain; border-radius: 8px; background: transparent; }
+    .gif-display.fade-in { animation: gifIn 350ms ease both; }
+    @keyframes gifIn {
+      from { opacity: 0; transform: scale(.96); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .error-state { display: none; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 0 20px; }
+    .error-icon  { font-size: 28px; }
+    .error-msg   { font-size: 13px; color: #fca5a5; }
+    .retry-btn {
+      padding: 7px 20px; border-radius: 20px;
+      background: rgba(252,165,165,.1); border: 1px solid rgba(252,165,165,.3);
+      color: #fca5a5; cursor: pointer; font-size: 12px; font-family: 'DM Sans', sans-serif;
+      transition: background 200ms;
+    }
+    .retry-btn:hover { background: rgba(252,165,165,.2); }
+    .sequence-info { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .sequence-dots { display: flex; gap: 6px; flex-wrap: wrap; }
+    .seq-dot       { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.12); transition: all 200ms var(--ease); }
+    .seq-dot.done  { background: rgba(167,139,250,.4); }
+    .seq-dot.active{ background: var(--accent); box-shadow: 0 0 8px rgba(167,139,250,.8); transform: scale(1.4); }
+    .seq-counter   { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .token-chips   { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip          { padding: 4px 10px; border-radius: 20px; font-size: 11px; border: 1px solid; }
+    .chip-phrase   { background: rgba(167,139,250,.1); border-color: rgba(167,139,250,.3); color: var(--accent); }
+    .chip-word     { background: rgba(103,232,249,.08); border-color: rgba(103,232,249,.25); color: var(--accent-2); }
+    .chip-unmatched{ background: rgba(252,165,165,.08); border-color: rgba(252,165,165,.2); color: #fca5a5; }
+    /* ── SIGN RECOGNITION ── */
+    .recognize-section { padding: 60px 0 96px; border-top: 1px solid var(--border); }
+    .recognize-grid    { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    @media (max-width: 768px) { .recognize-grid { grid-template-columns: 1fr; } }
+    .camera-panel      { padding: 28px; }
+    .prediction-panel  { padding: 28px; position: relative; }
+    .camera-wrap {
+      position: relative; background: rgba(0,0,0,0.5);
+      border-radius: var(--radius); overflow: hidden;
+      aspect-ratio: 4/3; border: 1px solid rgba(255,255,255,0.06); margin-bottom: 16px;
+    }
+    #rec-video  { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+    #rec-canvas { position: absolute; inset: 0; width: 100%; height: 100%; transform: scaleX(-1); pointer-events: none; }
+    .cam-idle {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 10px;
+      background: rgba(0,0,0,0.2);
+    }
+    .cam-idle-icon { font-size: 40px; opacity: 0.3; }
+    .cam-idle-text { font-size: 13px; color: var(--text-faint); }
+    .cam-badge {
+      position: absolute; border-radius: 20px; padding: 4px 10px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.06em;
+      backdrop-filter: blur(8px); display: none; align-items: center; gap: 5px;
+    }
+    .cam-badge.show { display: flex; }
+    .live-badge {
+      top: 12px; left: 12px;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(134,239,172,0.4); color: #86efac;
+    }
+    .live-dot { width: 6px; height: 6px; border-radius: 50%; background: #86efac; box-shadow: 0 0 5px #86efac; animation: pulse 1.5s infinite; }
+    .hand-badge {
+      bottom: 12px; left: 12px;
+      background: rgba(0,0,0,0.55); border: 1px solid rgba(167,139,250,0.35); color: var(--accent);
+    }
+    .cam-controls { display: flex; gap: 10px; }
+    .cam-start {
+      flex: 1; padding: 13px; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none; color: #1a1433;
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer;
+      transition: transform 200ms, box-shadow 200ms; box-shadow: 0 4px 20px var(--glow-purple);
+    }
+    .cam-start:hover  { transform: translateY(-2px); box-shadow: 0 8px 28px var(--glow-purple); }
+    .cam-stop {
+      padding: 13px 20px; border-radius: var(--radius);
+      background: var(--bg-surface); border: 1px solid var(--border);
+      color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      cursor: pointer; display: none; transition: background 200ms, border-color 200ms, color 200ms;
+    }
+    .cam-stop:hover { background: rgba(252,165,165,.07); border-color: rgba(252,165,165,.3); color: #fca5a5; }
+    .pred-box {
+      background: rgba(0,0,0,0.3); border-radius: var(--radius);
+      padding: 32px 20px; text-align: center; margin-bottom: 16px;
+      border: 1px solid rgba(255,255,255,0.06); min-height: 164px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+      transition: border-color 350ms, box-shadow 350ms;
+    }
+    .pred-box.live { border-color: var(--border-accent); box-shadow: 0 0 24px var(--glow-purple); }
+    .pred-idle-txt { font-size: 13px; color: var(--text-faint); }
+    .pred-eyebrow  { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--accent); font-weight: 700; }
+    .pred-sign {
+      font-family: 'Outfit', sans-serif; font-size: 52px; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      letter-spacing: -0.02em; animation: signPop 280ms var(--ease-spring) both;
+    }
+    @keyframes signPop { from { opacity: 0; transform: scale(.75); } to { opacity: 1; transform: scale(1); } }
+    .pred-conf-lbl { font-size: 13px; color: var(--text-muted); }
+    /* ── SPEECH OUTPUT ROW ── */
+    .speech-out-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 10px 14px; border-radius: var(--radius);
+      background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .speech-out-text {
+      flex: 1; font-size: 13px; color: var(--text-muted);
+      font-style: italic; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .speech-out-text.active { color: var(--accent); font-style: normal; font-weight: 500; }
+    .speak-btn {
+      padding: 6px 12px; border-radius: var(--radius-sm);
+      background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25);
+      color: var(--accent); font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 200ms; white-space: nowrap;
+      font-family: 'DM Sans', sans-serif; display: flex; align-items: center; gap: 5px;
+    }
+    .speak-btn:hover { background: rgba(167,139,250,0.2); box-shadow: 0 0 10px var(--glow-purple); }
+    .speak-btn.speaking { background: rgba(103,232,249,0.1); border-color: rgba(103,232,249,0.3); color: var(--accent-2); }
+    .speak-btn .speak-dot {
+      width: 5px; height: 5px; border-radius: 50%; background: currentColor;
+      animation: pulse 1s infinite; display: none;
+    }
+    .speak-btn.speaking .speak-dot { display: inline-block; }
+    .conf-row   { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+    .conf-track { background: rgba(255,255,255,.06); border-radius: 999px; height: 5px; overflow: hidden; margin-bottom: 18px; }
+    .conf-fill  { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent-2)); border-radius: 999px; width: 0%; transition: width 400ms var(--ease); }
+    .alts-label { font-size: 10px; color: var(--text-faint); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 8px; font-weight: 600; }
+    .alts-list  { display: flex; flex-direction: column; gap: 6px; }
+    .alt-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px; background: rgba(255,255,255,.03);
+      border-radius: 8px; border: 1px solid var(--border); transition: border-color 200ms;
+    }
+    .alt-row.top { border-color: rgba(167,139,250,.25); background: rgba(167,139,250,.04); }
+    .alt-name { font-size: 13px; }
+    .alt-row.top .alt-name { font-weight: 700; color: var(--accent); }
+    .alt-pct  { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+    .rec-status {
+      margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-faint); text-align: center;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    /* ── ARCHITECTURE ── */
+    .arch-section  { padding: 60px 0 96px; border-top: 1px solid var(--border); }
+    .arch-diagram  { padding: 40px; margin-bottom: 40px; }
+    .arch-flow     { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; }
+    .arch-node {
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      padding: 20px 14px; border-radius: var(--radius);
+      background: var(--bg-surface-2); border: 1px solid var(--border);
+      min-width: 110px; text-align: center;
+      transition: border-color 250ms, box-shadow 250ms, transform 250ms; cursor: default;
+    }
+    .arch-node:hover { border-color: var(--border-accent); box-shadow: 0 0 20px var(--glow-purple); transform: translateY(-3px); }
+    .arch-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
+    .n-browser .arch-icon { background: rgba(103,232,249,.15); }
+    .n-gateway .arch-icon { background: rgba(167,139,250,.15); }
+    .n-lambda  .arch-icon { background: rgba(240,171,252,.15); }
+    .n-sage    .arch-icon { background: rgba(134,239,172,.12); }
+    .n-s3      .arch-icon { background: rgba(252,211,77,.12);  }
+    .arch-name { font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; }
+    .arch-sub  { font-size: 10px; color: var(--text-faint); }
+    .arch-arrow {
+      width: 32px; height: 2px; flex-shrink: 0;
+      background: linear-gradient(90deg, rgba(167,139,250,.3), rgba(103,232,249,.3));
+      position: relative;
+    }
+    .arch-arrow::after {
+      content: ''; position: absolute; right: 0; top: -4px;
+      border: 5px solid transparent; border-left-color: rgba(103,232,249,.5);
+    }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .feature-card {
+      padding: 26px; border-radius: var(--radius);
+      background: var(--bg-surface); border: 1px solid var(--border);
+      transition: border-color 250ms, transform 250ms, box-shadow 250ms;
+    }
+    .feature-card:hover { border-color: var(--border-accent); transform: translateY(-3px); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+    .feature-icon  { font-size: 24px; margin-bottom: 14px; }
+    .feature-title { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+    .feature-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.7; }
+    /* ── DEPLOY ── */
+    .deploy-section { padding: 60px 0; border-top: 1px solid var(--border); }
+    .steps-grid     { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .step-card      { padding: 26px; }
+    .step-num {
+      font-family: 'Outfit', sans-serif; font-size: 40px; font-weight: 800; line-height: 1; margin-bottom: 14px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .step-title { font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .step-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    .code-pill {
+      display: inline-block; background: rgba(0,0,0,.4); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 6px; padding: 3px 8px; font-family: 'Courier New', monospace;
+      font-size: 11px; color: var(--accent-2); margin-top: 8px;
+    }
+    /* ── ROADMAP ── */
+    .roadmap-section  { padding: 60px 0 96px; border-top: 1px solid var(--border); }
+    .roadmap-timeline { display: flex; flex-direction: column; position: relative; max-width: 620px; margin: 0 auto; }
+    .roadmap-timeline::before {
+      content: ''; position: absolute; left: 20px; top: 0; bottom: 0;
+      width: 1px; background: linear-gradient(180deg, var(--accent), transparent);
+    }
+    .roadmap-item { display: flex; gap: 20px; align-items: flex-start; padding: 22px 0; }
+    .r-dot {
+      width: 40px; height: 40px; border-radius: 50%; flex-shrink: 0; z-index: 1;
+      display: flex; align-items: center; justify-content: center; font-size: 18px;
+      border: 1px solid var(--border-accent); background: var(--bg-deep);
+    }
+    .roadmap-item.current .r-dot { background: linear-gradient(135deg, var(--accent), var(--accent-2)); box-shadow: 0 0 16px var(--glow-purple); }
+    .r-phase { font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--accent); margin-bottom: 4px; font-weight: 600; }
+    .r-title { font-family: 'Outfit', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .r-desc  { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+    /* ── FOOTER ── */
+    footer { border-top: 1px solid var(--border); padding: 56px 0; text-align: center; }
+    .footer-logo {
+      font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800; margin-bottom: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .footer-tagline { font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; font-weight: 600; margin-bottom: 18px; }
+    .footer-mission { font-size: 13px; color: var(--text-muted); max-width: 500px; margin: 0 auto 20px; font-weight: 300; line-height: 1.7; }
+    .footer-copy    { font-size: 11px; color: var(--text-faint); }
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeUp 600ms var(--ease) both; }
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(10,8,20,.85);
+      backdrop-filter: blur(10px); z-index: 1000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 250ms;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    .modal       { width: 100%; max-width: 460px; padding: 36px; border-radius: var(--radius-lg); }
+    .modal-title { font-family: 'Outfit', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+    .modal-desc  { font-size: 13px; color: var(--text-muted); margin-bottom: 28px; font-weight: 300; }
+    .form-group  { margin-bottom: 16px; }
+    .form-label  { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 6px; letter-spacing: .04em; text-transform: uppercase; font-weight: 600; }
+    .form-input  {
+      width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 11px 14px; color: var(--text);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; outline: none;
+      transition: border-color 200ms, box-shadow 200ms;
+    }
+    .form-input:focus       { border-color: var(--border-accent); box-shadow: 0 0 0 3px var(--glow-purple); }
+    .form-input::placeholder{ color: var(--text-faint); }
+    .modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+    .modal-save {
+      flex: 1; padding: 13px; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none; color: #1a1433;
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity 200ms, transform 200ms;
+    }
+    .modal-save:hover { opacity: .9; transform: translateY(-1px); }
+    .modal-cancel {
+      padding: 13px 22px; border-radius: var(--radius);
+      background: transparent; border: 1px solid var(--border);
+      color: var(--text-muted); font-family: 'DM Sans', sans-serif; font-size: 14px;
+      cursor: pointer; transition: background 200ms;
+    }
+    .modal-cancel:hover { background: var(--bg-surface); }
+    /* ── EXTENSION DEMO MODAL ── */
+    .ext-modal-overlay {
+      position: fixed; inset: 0; background: rgba(10,8,20,.92);
+      backdrop-filter: blur(12px); z-index: 2000;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 300ms var(--ease);
+    }
+    .ext-modal-overlay.open { opacity: 1; pointer-events: all; }
+    .ext-modal-box {
+      width: 100%; max-width: 480px;
+      background: rgba(26,22,48,0.98);
+      border: 1px solid var(--border-accent);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 0 60px var(--glow-purple), 0 30px 80px rgba(0,0,0,0.6);
+      overflow: hidden; animation: fadeUp 300ms var(--ease) both;
+    }
+    .ext-modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+    }
+    .ext-modal-title {
+      font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .ext-modal-badge {
+      font-size: 9px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; padding: 3px 8px; border-radius: 20px;
+      background: rgba(134,239,172,0.12); border: 1px solid rgba(134,239,172,0.3);
+      color: #86efac;
+    }
+    .ext-modal-close {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: var(--bg-surface-2); border: 1px solid var(--border);
+      color: var(--text-muted); cursor: pointer; font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 200ms;
+    }
+    .ext-modal-close:hover { background: rgba(252,165,165,.1); border-color: rgba(252,165,165,.3); color: #fca5a5; }
+    .ext-modal-iframe {
+      width: 100%; height: 480px; border: none; display: block;
+      background: #0a0814;
+    }
+    .ext-modal-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      font-size: 11px; color: var(--text-faint); text-align: center;
+    }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+      padding: 12px 20px; border-radius: var(--radius);
+      background: rgba(22,18,42,.96); border: 1px solid var(--border);
+      font-size: 13px; color: var(--text); backdrop-filter: blur(16px);
+      transform: translateY(60px); opacity: 0; pointer-events: none;
+      transition: transform 300ms var(--ease), opacity 300ms; max-width: 300px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.ok   { border-color: rgba(134,239,172,.4); color: #86efac; }
+    .toast.err  { border-color: rgba(252,165,165,.4); color: #fca5a5; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav>
+    <div class="container">
+      <div class="nav-inner">
+        <a class="nav-logo" href="#">
+          <div class="nav-logo-mark"><img src="logo.png" alt="Jestally" /></div>
+          <div>
+            <div class="nav-brand">Jestally</div>
+            <div class="nav-tagline">Ally Without Limits &nbsp;·&nbsp; ISL AI Platform</div>
+          </div>
+        </a>
+        <div class="nav-right">
+          <ul class="nav-links">
+            <li><a href="#demo">Translate</a></li>
+            <li><a href="#recognize">Recognize</a></li>
+            <li><a href="#architecture">How It Works</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#extension">Extension</a></li>
+          </ul>
+          <div class="nav-lang-pill" title="Output Language">
+            <span class="flag" id="nav-flag">IN</span>
+            <select id="global-lang-select" aria-label="Select output language"></select>
+            <span class="chevron">▾</span>
+          </div>
+          <a href="#" class="nav-cta" id="configure-btn">
+            <span class="nav-connected-dot" id="api-dot"></span>
+            Configure API
+          </a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        Live Platform &nbsp;·&nbsp; Indian Sign Language &nbsp;·&nbsp; Powered by AWS
+      </div>
+      <h1 class="hero-title">
+        <span class="gradient-text">Jestally.</span><br/>
+        <span style="font-weight:300;letter-spacing:-0.01em;">Ally Without Limits.</span>
+      </h1>
+      <p class="hero-sub">
+        Real-time speech-to-ISL translation and camera-based sign recognition — built for India's 63 million deaf and hard-of-hearing citizens. No downloads. No plugins. Just communication, reimagined.
+      </p>
+      <div class="hero-ctas">
+        <a href="#demo"       class="btn btn-primary">Try the Demo &nbsp;→</a>
+        <a href="#recognize"  class="btn btn-ghost">Sign Recognition</a>
+        <a href="https://github.com/Shada0/jestally/releases/latest/download/jestally-extension.zip"
+           class="btn btn-ghost" id="ext-download-btn" download>
+          ⬇&nbsp; Chrome Extension
+        </a>
+        <button class="btn btn-ghost" id="ext-demo-btn" style="border-color:rgba(134,239,172,0.3);color:#86efac;">
+          🧩&nbsp; Try Extension Live
+        </button>
+      </div>
+      <div class="hero-pillars">
+        <div class="hero-pillar"><div class="pillar-val">ISL</div><div class="pillar-lbl">Indian Sign Language</div></div>
+        <div class="hero-pillar"><div class="pillar-val">22+</div><div class="pillar-lbl">Supported Languages</div></div>
+        <div class="hero-pillar"><div class="pillar-val">< 100ms</div><div class="pillar-lbl">Inference Latency</div></div>
+        <div class="hero-pillar"><div class="pillar-val">AWS</div><div class="pillar-lbl">Serverless Infrastructure</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Translate Section ── -->
+  <section class="demo-section" id="demo">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Speech &amp; Text &nbsp;→&nbsp; ISL Output</p>
+        <h2 class="section-title">Translate to Sign Language</h2>
+        <p class="section-desc">Speak or type in any of 22 Indian languages. Jestally resolves your input into Indian Sign Language and plays the full gesture sequence — no installs, no latency.</p>
+      </div>
+      <div class="demo-grid">
+        <!-- Input -->
+        <div class="glass glass-accent input-panel">
+          <p class="panel-label">Input</p>
+          <div class="lang-bar" style="position:relative;">
+            <span class="lang-bar-label">Language</span>
+            <div class="lang-chips" id="translate-lang-chips"></div>
+            <button class="lang-more-btn" id="translate-lang-more">More ▾</button>
+            <div class="lang-dropdown" id="translate-lang-dropdown">
+              <div class="lang-dropdown-title">Select Input Language</div>
+              <div class="lang-dropdown-grid" id="translate-lang-grid"></div>
+            </div>
+          </div>
+          <!-- ISL GRAMMAR PREVIEW STRIP -->
+          <div class="isl-grammar-strip" id="isl-grammar-strip">
+            <span class="isl-grammar-label">ISL</span>
+            <span class="isl-grammar-text" id="isl-grammar-text"></span>
+          </div>
+          <div class="speech-controls">
+            <button class="mic-btn" id="mic-btn" aria-label="Toggle microphone">🎤</button>
+            <textarea class="text-input" id="text-input" rows="2"
+              placeholder="Type or speak a phrase…"></textarea>
+          </div>
+          <button class="translate-btn" id="translate-btn">Translate to ISL</button>
+          <div class="settings-row">
+            <div class="setting-item">
+              <button class="mini-toggle on" id="auto-toggle" aria-pressed="true"></button>
+              Auto-translate
+            </div>
+            <div class="setting-item">
+              <button class="mini-toggle" id="cache-toggle" aria-pressed="false"></button>
+              Cache GIFs
+            </div>
+          </div>
+        </div>
+        <!-- Output -->
+        <div class="glass output-panel">
+          <p class="panel-label">ISL Output</p>
+          <div class="avatar-stage" id="avatar-stage" aria-live="polite">
+            <div class="listening-state" id="state-listening">
+              <div class="wave-viz" aria-hidden="true">
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div><div class="wave-bar"></div>
+                <div class="wave-bar"></div>
+              </div>
+              <p class="listening-text">Ready to translate</p>
+            </div>
+            <div class="loading-state" id="state-loading">
+              <div class="shimmer-block"></div>
+              <p class="listening-text">Translating…</p>
+            </div>
+            <video class="gif-display" id="gif-display" autoplay muted playsinline></video>
+            <div class="error-state" id="state-error">
+              <span class="error-icon">⚠️</span>
+              <p class="error-msg" id="error-msg">Something went wrong</p>
+              <button class="retry-btn" id="retry-btn">Try Again</button>
+            </div>
+          </div>
+          <div class="sequence-info" id="sequence-info" style="display:none">
+            <div class="sequence-dots" id="sequence-dots"></div>
+            <span class="seq-counter" id="seq-counter"></span>
+          </div>
+          <div class="token-chips" id="token-chips"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Sign Recognition ── -->
+  <section class="recognize-section" id="recognize">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">On-Device Processing &nbsp;·&nbsp; Cloud Inference &nbsp;·&nbsp; < 100ms</p>
+        <h2 class="section-title">Real-Time Sign Recognition</h2>
+        <p class="section-desc">Jestally captures hand geometry through your camera, extracts 21-point skeletal structure entirely on-device, and classifies the sign via a TensorFlow model on SageMaker — private, fast, and fully browser-native.</p>
+      </div>
+      <div class="recognize-grid">
+        <div class="glass glass-accent camera-panel">
+          <p class="panel-label">Camera Feed</p>
+          <div class="camera-wrap">
+            <video id="rec-video" autoplay playsinline muted></video>
+            <canvas id="rec-canvas"></canvas>
+            <div class="cam-idle" id="cam-idle">
+              <div class="cam-idle-icon">📷</div>
+              <div class="cam-idle-text">Camera is inactive</div>
+            </div>
+            <div class="cam-badge live-badge" id="live-badge">
+              <span class="live-dot"></span> LIVE
+            </div>
+            <div class="cam-badge hand-badge" id="hand-badge">✋ Hand Detected</div>
+          </div>
+          <div class="cam-controls">
+            <button class="cam-start" id="cam-start">▶&nbsp; Start Camera</button>
+            <button class="cam-stop"  id="cam-stop">■&nbsp; Stop</button>
+          </div>
+        </div>
+        <div class="glass prediction-panel">
+          <p class="panel-label">AI Prediction</p>
+          <div class="lang-bar" style="position:relative; margin-bottom:14px;">
+            <span class="lang-bar-label">Speak in</span>
+            <div class="lang-chips" id="recog-lang-chips"></div>
+            <button class="lang-more-btn" id="recog-lang-more">More ▾</button>
+            <div class="lang-dropdown" id="recog-lang-dropdown">
+              <div class="lang-dropdown-title">Select Speech Output Language</div>
+              <div class="lang-dropdown-grid" id="recog-lang-grid"></div>
+            </div>
+          </div>
+          <div class="pred-box" id="pred-box">
+            <p class="pred-idle-txt">Start camera to begin</p>
+          </div>
+          <div class="speech-out-row" id="speech-out-row">
+            <span class="speech-out-text" id="speech-out-text">No sign detected yet…</span>
+            <button class="speak-btn" id="speak-btn">
+              <span class="speak-dot"></span>
+              🔊 Speak
+            </button>
+          </div>
+          <div id="conf-wrap" style="display:none">
+            <div class="conf-row">
+              <span>Model Confidence</span>
+              <span id="conf-pct">—</span>
+            </div>
+            <div class="conf-track">
+              <div class="conf-fill" id="conf-fill"></div>
+            </div>
+          </div>
+          <div id="alts-wrap" style="display:none">
+            <div class="alts-label">Alternate Predictions</div>
+            <div class="alts-list" id="alts-list"></div>
+          </div>
+          <div class="rec-status">
+            <span id="status-icon">⏸</span>
+            <span id="status-text">Waiting for camera…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Architecture ── -->
+  <section class="arch-section" id="architecture">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">System Architecture &nbsp;·&nbsp; AWS Native &nbsp;·&nbsp; Serverless</p>
+        <h2 class="section-title">Built to Scale</h2>
+        <p class="section-desc">A fully serverless, event-driven architecture — purpose-built for scale, resilience, and zero idle overhead. Every layer is independently deployable.</p>
+      </div>
+      <div class="glass arch-diagram">
+        <div class="arch-flow">
+          <div class="arch-node n-browser"><div class="arch-icon">🌐</div><div class="arch-name">Browser</div><div class="arch-sub">MediaPipe · Speech API</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node n-gateway"><div class="arch-icon">🔗</div><div class="arch-name">API Gateway</div><div class="arch-sub">REST · Auth · CORS</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node n-lambda"><div class="arch-icon">λ</div><div class="arch-name">Lambda</div><div class="arch-sub">Inference Routing</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node n-sage"><div class="arch-icon">🧠</div><div class="arch-name">SageMaker</div><div class="arch-sub">TF Serving · ML Model</div></div>
+          <div class="arch-arrow"></div>
+          <div class="arch-node n-s3"><div class="arch-icon">📦</div><div class="arch-name">S3 · CloudFront</div><div class="arch-sub">Assets · Model Weights</div></div>
+        </div>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card"><div class="feature-icon">👁️</div><h3 class="feature-title">On-Device Hand Tracking</h3><p class="feature-desc">MediaPipe extracts a 21-point hand skeleton entirely in-browser. Zero video leaves the device — only a compact 63-float coordinate vector is transmitted for inference.</p></div>
+        <div class="feature-card"><div class="feature-icon">⚡</div><h3 class="feature-title">Phrase-First Resolution</h3><p class="feature-desc">The translation engine resolves multi-word expressions before word-level lookup — delivering contextually accurate, natural ISL sequences every time.</p></div>
+        <div class="feature-card"><div class="feature-icon">🌐</div><h3 class="feature-title">All 22 Scheduled Languages</h3><p class="feature-desc">Speech input and sign-to-speech output across all 22 constitutionally recognised Indian languages — Hindi, Tamil, Telugu, Bengali, Kannada, Malayalam, and beyond.</p></div>
+        <div class="feature-card"><div class="feature-icon">🔒</div><h3 class="feature-title">Security by Design</h3><p class="feature-desc">Least-privilege IAM at every service boundary. API key authentication on all endpoints. CORS scoped to authorised origins. No user data stored.</p></div>
+        <div class="feature-card"><div class="feature-icon">🧩</div><h3 class="feature-title">Live Video Call Integration</h3><p class="feature-desc">A Manifest V3 Chrome extension embeds Jestally directly into Google Meet and Zoom — an always-on ISL overlay with zero performance impact on the call.</p></div>
+        <div class="feature-card"><div class="feature-icon">🎮</div><h3 class="feature-title">Production ML Pipeline</h3><p class="feature-desc">TensorFlow Serving on Amazon SageMaker delivers low-latency inference at scale. Custom pre/post-processing normalises hand geometry and returns confidence-ranked predictions.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Deploy ── -->
+  <section class="deploy-section" id="deploy">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Infrastructure as Code &nbsp;·&nbsp; One-Command Deploy</p>
+        <h2 class="section-title">Deploy in Minutes</h2>
+        <p class="section-desc">A single CloudFormation template provisions the entire stack — API Gateway, Lambda, IAM, S3, and SageMaker. Repeatable across environments with zero manual steps.</p>
+      </div>
+      <div class="steps-grid">
+        <div class="glass step-card"><div class="step-num">01</div><h3 class="step-title">Provision Infrastructure</h3><p class="step-desc">One template deploys API Gateway, Lambda, IAM roles, and S3 in a single atomic operation — fully repeatable across environments.</p><code class="code-pill">aws cloudformation deploy …</code></div>
+        <div class="glass step-card"><div class="step-num">02</div><h3 class="step-title">Deploy the ML Model</h3><p class="step-desc">Package the trained model, upload to S3, and provision a SageMaker TF Serving endpoint — fully scripted, no manual steps.</p><code class="code-pill">python create_sagemaker_model.py</code></div>
+        <div class="glass step-card"><div class="step-num">03</div><h3 class="step-title">Deploy Lambda Handler</h3><p class="step-desc">Zip, deploy, and wire the inference Lambda to API Gateway with a single command. Permission bindings are handled automatically.</p><code class="code-pill">python deploy_lambda.py</code></div>
+        <div class="glass step-card"><div class="step-num">04</div><h3 class="step-title">Connect the Frontend</h3><p class="step-desc">Paste your endpoint and API key into the Configure API panel. The full system goes live immediately — no rebuild required.</p><code class="code-pill">Configure API → Save &amp; Connect</code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Roadmap ── -->
+  <section class="roadmap-section" id="roadmap">
+    <div class="container">
+      <div class="section-header">
+        <p class="section-eyebrow">Product Vision</p>
+        <h2 class="section-title">Product Roadmap</h2>
+      </div>
+      <div class="roadmap-timeline">
+        <div class="roadmap-item current">
+          <div class="r-dot">🚀</div>
+          <div><p class="r-phase">v1.0 &nbsp;·&nbsp; Live Now</p><h3 class="r-title">Speech-to-ISL Translation &amp; Sign Recognition</h3><p class="r-desc">Web application and Chrome extension delivering real-time ISL translation, on-device hand tracking, AWS-hosted sign classification, and multilingual TTS — production-ready and live.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="r-dot">🤖</div>
+          <div><p class="r-phase">v2.0 &nbsp;·&nbsp; In Development</p><h3 class="r-title">Continuous Streaming &amp; Sentence-Level Understanding</h3><p class="r-desc">WebSocket-based sign streaming for uninterrupted full-sentence recognition. Fingerspelling fallback for vocabulary edge cases.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="r-dot">🌐</div>
+          <div><p class="r-phase">v3.0 &nbsp;·&nbsp; Upcoming</p><h3 class="r-title">Global Sign Language Support &amp; 3D Avatars</h3><p class="r-desc">Expanding to ASL, BSL, and JSL. Photorealistic 3D signing avatars rendered in real-time via WebGL.</p></div>
+        </div>
+        <div class="roadmap-item">
+          <div class="r-dot">🏫</div>
+          <div><p class="r-phase">v4.0 &nbsp;·&nbsp; 2026</p><h3 class="r-title">Enterprise Platform &amp; Education Suite</h3><p class="r-desc">White-label SDK for video conferencing platforms. A dedicated school and institution portal with structured curriculum tools and analytics.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Chrome Extension Banner ── -->
+  <section style="padding:60px 0; border-top:1px solid var(--border); text-align:center;" id="extension">
+    <div class="container">
+      <p class="section-eyebrow">Chrome Extension &nbsp;·&nbsp; Google Meet &nbsp;·&nbsp; Zoom</p>
+      <h2 class="section-title" style="margin-bottom:14px;">ISL Overlay for Video Calls</h2>
+      <p class="section-desc" style="margin-bottom:36px;">Install the Jestally Chrome extension to get a live ISL translation panel directly inside Google Meet and Zoom — no tab switching, no interruptions.</p>
+      <div style="display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:40px;">
+        <a href="https://github.com/Shada0/jestally/releases/latest/download/jestally-extension.zip"
+           class="btn btn-primary" download>⬇&nbsp; Download Extension (.zip)</a>
+        <a href="https://github.com/Shada0/jestally" target="_blank" class="btn btn-ghost">View on GitHub →</a>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;max-width:800px;margin:0 auto;text-align:left;">
+        <div class="glass" style="padding:20px;">
+          <div style="font-size:22px;margin-bottom:10px;">1️⃣</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px;">Download the zip</div>
+          <div style="font-size:12px;color:var(--text-muted);">Click the button above to download <code style="font-size:11px;color:var(--accent-2);">jestally-extension.zip</code></div>
+        </div>
+        <div class="glass" style="padding:20px;">
+          <div style="font-size:22px;margin-bottom:10px;">2️⃣</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px;">Unzip the folder</div>
+          <div style="font-size:12px;color:var(--text-muted);">Extract the zip to any folder on your computer.</div>
+        </div>
+        <div class="glass" style="padding:20px;">
+          <div style="font-size:22px;margin-bottom:10px;">3️⃣</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px;">Open Chrome Extensions</div>
+          <div style="font-size:12px;color:var(--text-muted);">Go to <code style="font-size:11px;color:var(--accent-2);">chrome://extensions</code> → enable Developer Mode.</div>
+        </div>
+        <div class="glass" style="padding:20px;">
+          <div style="font-size:22px;margin-bottom:10px;">4️⃣</div>
+          <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:14px;margin-bottom:6px;">Load Unpacked</div>
+          <div style="font-size:12px;color:var(--text-muted);">Click <strong>Load unpacked</strong> and select the extracted folder.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer ── -->
+  <footer>
+    <div class="container">
+      <div class="footer-logo"><img src="logo.png" alt="Jestally" style="height:36px;object-fit:contain;display:inline-block;vertical-align:middle;margin-bottom:2px;" /></div>
+      <div class="footer-tagline">Ally Without Limits</div>
+      <p class="footer-mission">Communication is a fundamental right. Jestally bridges spoken language and Indian Sign Language — accessible to all, intelligent by design, and built for the 63 million people who need it most.</p>
+      <p class="footer-copy">© 2025 Jestally &nbsp;·&nbsp; Indian Sign Language AI Platform &nbsp;·&nbsp; Powered by AWS &amp; MediaPipe</p>
+    </div>
+  </footer>
+
+  <!-- ── Configure API Modal ── -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="glass glass-accent modal">
+      <h2 class="modal-title" id="modal-title">Configure API</h2>
+      <p class="modal-desc">Connect Jestally to your AWS backend. Both the translate and recognition endpoints use a single API key.</p>
+      <div class="form-group">
+        <label class="form-label" for="m-endpoint">Translate Endpoint</label>
+        <input class="form-input" type="url" id="m-endpoint" placeholder="https://…execute-api.ap-south-1.amazonaws.com/prod/resolve" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="m-rec-endpoint">Recognize Endpoint</label>
+        <input class="form-input" type="url" id="m-rec-endpoint" placeholder="https://…execute-api.ap-south-1.amazonaws.com/prod/recognize" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="m-key">API Key</label>
+        <input class="form-input" type="password" id="m-key" placeholder="x-api-key value" />
+      </div>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modal-cancel">Cancel</button>
+        <button class="modal-save"   id="modal-save">Save &amp; Connect</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Toast ── -->
+  <div class="toast" id="toast"></div>
+
+  <!-- ── Extension Demo Modal ── -->
+  <div class="ext-modal-overlay" id="ext-modal-overlay">
+    <div class="ext-modal-box">
+      <div class="ext-modal-header">
+        <div class="ext-modal-title">
+          🧩 Extension Preview &nbsp;<span class="ext-modal-badge">● Live</span>
+        </div>
+        <button class="ext-modal-close" id="ext-modal-close">✕</button>
+      </div>
+      <iframe class="ext-modal-iframe" id="ext-modal-iframe"
+        src="" allow="camera; microphone"
+        allowtransparency="true"></iframe>
+      <div class="ext-modal-footer">
+        This is the live camera experience embedded inside the Chrome extension panel.
+        Allow camera access when prompted.
+      </div>
+    </div>
+  </div>
+
+  <script>
+  // ════════════════════════════════════════════════════════════════
+  // INDIAN LANGUAGES REGISTRY
+  // ════════════════════════════════════════════════════════════════
+  const LANGUAGES = [
+    { code: 'en-IN',  name: 'English',   native: 'English',       flag: 'IN', ttsLang: 'en-IN',  myMemory: 'en',  quick: true  },
+    { code: 'hi-IN',  name: 'Hindi',     native: 'हिंदी',          flag: 'IN', ttsLang: 'hi-IN',  myMemory: 'hi',  quick: true  },
+    { code: 'ta-IN',  name: 'Tamil',     native: 'தமிழ்',          flag: 'IN', ttsLang: 'ta-IN',  myMemory: 'ta',  quick: true  },
+    { code: 'te-IN',  name: 'Telugu',    native: 'తెలుగు',         flag: 'IN', ttsLang: 'te-IN',  myMemory: 'te',  quick: true  },
+    { code: 'kn-IN',  name: 'Kannada',   native: 'ಕನ್ನಡ',          flag: 'IN', ttsLang: 'kn-IN',  myMemory: 'kn',  quick: true  },
+    { code: 'ml-IN',  name: 'Malayalam', native: 'മലയാളം',         flag: 'IN', ttsLang: 'ml-IN',  myMemory: 'ml',  quick: false },
+    { code: 'bn-IN',  name: 'Bengali',   native: 'বাংলা',           flag: 'IN', ttsLang: 'bn-IN',  myMemory: 'bn',  quick: false },
+    { code: 'mr-IN',  name: 'Marathi',   native: 'मराठी',           flag: 'IN', ttsLang: 'mr-IN',  myMemory: 'mr',  quick: false },
+    { code: 'gu-IN',  name: 'Gujarati',  native: 'ગુજરાતી',         flag: 'IN', ttsLang: 'gu-IN',  myMemory: 'gu',  quick: false },
+    { code: 'pa-IN',  name: 'Punjabi',   native: 'ਪੰਜਾਬੀ',          flag: 'IN', ttsLang: 'pa-IN',  myMemory: 'pa',  quick: false },
+    { code: 'or-IN',  name: 'Odia',      native: 'ଓଡ଼ିଆ',           flag: 'IN', ttsLang: 'or-IN',  myMemory: 'or',  quick: false },
+    { code: 'as-IN',  name: 'Assamese',  native: 'অসমীয়া',         flag: 'IN', ttsLang: 'as-IN',  myMemory: 'as',  quick: false },
+    { code: 'ur-IN',  name: 'Urdu',      native: 'اردو',            flag: 'IN', ttsLang: 'ur-IN',  myMemory: 'ur',  quick: false },
+    { code: 'sd-IN',  name: 'Sindhi',    native: 'سنڌي',            flag: 'IN', ttsLang: 'sd-IN',  myMemory: 'sd',  quick: false },
+    { code: 'ks-IN',  name: 'Kashmiri',  native: 'कॉशुर',           flag: 'IN', ttsLang: 'ks-IN',  myMemory: 'ks',  quick: false },
+    { code: 'ne-IN',  name: 'Nepali',    native: 'नेपाली',          flag: 'IN', ttsLang: 'ne-IN',  myMemory: 'ne',  quick: false },
+    { code: 'sa-IN',  name: 'Sanskrit',  native: 'संस्कृतम्',        flag: 'IN', ttsLang: 'sa-IN',  myMemory: 'sa',  quick: false },
+    { code: 'mai-IN', name: 'Maithili',  native: 'मैथिली',          flag: 'IN', ttsLang: 'hi-IN',  myMemory: 'hi',  quick: false },
+    { code: 'kok-IN', name: 'Konkani',   native: 'कोंकणी',          flag: 'IN', ttsLang: 'mr-IN',  myMemory: 'mr',  quick: false },
+    { code: 'mni-IN', name: 'Manipuri',  native: 'মৈতৈলোন্',       flag: 'IN', ttsLang: 'bn-IN',  myMemory: 'bn',  quick: false },
+    { code: 'doi-IN', name: 'Dogri',     native: 'डोगरी',           flag: 'IN', ttsLang: 'hi-IN',  myMemory: 'hi',  quick: false },
+    { code: 'sat-IN', name: 'Santali',   native: 'ᱥᱟᱱᱛᱟᱲᱤ',       flag: 'IN', ttsLang: 'or-IN',  myMemory: 'or',  quick: false },
+    { code: 'bo-IN',  name: 'Bodo',      native: 'बड़ो',             flag: 'IN', ttsLang: 'hi-IN',  myMemory: 'hi',  quick: false },
+  ];
+
+  // ════════════════════════════════════════════════════════════════
+  // ISL ALIAS MAP
+  // ════════════════════════════════════════════════════════════════
+  const ISL_ALIAS_MAP = {
+    'namaste': 'hello', 'namaskar': 'hello', 'vanakkam': 'hello',
+    'pranam': 'hello', 'salam': 'hello', 'salaam': 'hello',
+    'nomoskar': 'hello', 'sat sri akal': 'hello', 'jai jinendra': 'hello',
+    'kem cho': 'hello', 'ki khobor': 'hello',
+    'alvida': 'goodbye', 'tata': 'goodbye', 'phir milenge': 'goodbye',
+    'bye bye': 'goodbye', 'chalo': 'goodbye',
+    'dhanyawad': 'thank you', 'dhanyavaad': 'thank you', 'shukriya': 'thank you',
+    'aabhar': 'thank you', 'nandri': 'thank you', 'vandhanam': 'thank you',
+    'dhanyoshmita': 'thank you', 'asante': 'thank you',
+    'maafi': 'sorry', 'kshama': 'sorry', 'mafi karna': 'sorry',
+    'maafi karo': 'sorry', 'kshama karo': 'sorry',
+    'haan': 'yes', 'ha': 'yes', 'ji': 'yes', 'haw': 'yes', 'aama': 'yes',
+    'nahi': 'no', 'na': 'no', 'illa': 'no', 'venda': 'no', 'vendam': 'no',
+    'madad': 'help', 'sahayata': 'help', 'udav': 'help',
+    'paani': 'water', 'jal': 'water', 'neer': 'water',
+    'khana': 'food', 'bhojan': 'food', 'saapadu': 'food',
+    'mera naam': 'name', 'aapka naam': 'name',
+    'ghar': 'home', 'school': 'school', 'vidyalaya': 'school',
+    'doctor': 'doctor', 'dawakhana': 'hospital', 'aspatal': 'hospital',
+    'paise': 'money', 'rupaye': 'money',
+    'time': 'time', 'samay': 'time', 'waqt': 'time',
+    'pyaar': 'love', 'prem': 'love', 'kadhal': 'love', 'ishq': 'love',
+    'accha': 'good', 'badhiya': 'good', 'theek': 'good',
+    'bura': 'bad', 'kharab': 'bad',
+    'bada': 'big', 'chota': 'small',
+    'maa': 'mother', 'amma': 'mother', 'mata': 'mother',
+    'baap': 'father', 'pita': 'father', 'appa': 'father', 'abba': 'father',
+    'bhai': 'brother', 'anna': 'brother',
+    'behen': 'sister', 'akka': 'sister',
+  };
+
+  // ════════════════════════════════════════════════════════════════
+  // ISL GRAMMAR ENGINE
+  // ════════════════════════════════════════════════════════════════
+  const ISL_GRAMMAR_RULES = {
+    DROP: new Set([
+      'a','an','the',
+      'is','are','was','were','am','be','been','being',
+      'do','does','did','will','would','could','should','shall','may','might',
+      'very','really','just','quite','so','such','too','also',
+      'please','kindly',
+      'of','in','at','to','for','with','by','from','on','about',
+      'into','through','during','before','after','above','below',
+      'between','each','other','some','both','either','neither','whether',
+    ]),
+    WH:   new Set(['who','what','where','when','why','how','which','whose','whom']),
+    TIME: new Set(['yesterday','tomorrow','today','now','later','soon',
+                   'morning','evening','night','always','never','often','already']),
+    NEG:  new Set(['not','never','nobody','nothing','nowhere']),
+    PRONOUNS: {
+      'i':'me','i\'m':'me','my':'my','mine':'my',
+      'you':'you','your':'your','yours':'your',
+      'he':'he','his':'his','him':'he',
+      'she':'she','her':'she','hers':'her',
+      'we':'we','our':'our','us':'we',
+      'they':'they','their':'their','them':'they',
+      'it':'it','its':'its',
+      'this':'this','that':'that','these':'these','those':'those',
+    },
+  };
+
+  function applyISLGrammar(englishText) {
+    const text = englishText.toLowerCase()
+      .replace(/[?!.,;:'"]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    const tokens    = text.split(' ').filter(Boolean);
+    const timeWords = [], whWords = [], negWords = [], mainWords = [];
+    for (const t of tokens) {
+      if (ISL_GRAMMAR_RULES.DROP.has(t)) continue;
+      const norm = ISL_GRAMMAR_RULES.PRONOUNS[t] || t;
+      if (ISL_GRAMMAR_RULES.TIME.has(t))     timeWords.push(norm);
+      else if (ISL_GRAMMAR_RULES.WH.has(t))  whWords.push(norm);
+      else if (ISL_GRAMMAR_RULES.NEG.has(t)) negWords.push('not');
+      else                                    mainWords.push(norm);
+    }
+    const result = [...timeWords, ...mainWords, ...negWords, ...whWords];
+    return result.filter((t, i) => t !== result[i - 1]).join(' ');
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // normalizeForISL
+  // ════════════════════════════════════════════════════════════════
+  function normalizeForISL(text) {
+    const lower = text.trim().toLowerCase();
+    if (ISL_ALIAS_MAP[lower]) return ISL_ALIAS_MAP[lower];
+    return lower.split(/\s+/).map(w => ISL_ALIAS_MAP[w] || w).join(' ');
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // ISL TRANSLATIONS — hardcoded for all 143 signs × all Indian languages
+  // This is the PRIMARY translation source. MyMemory is fallback only.
+  // ════════════════════════════════════════════════════════════════
+  const ISL_TRANSLATIONS = {
+    '0':{'hi':'शून्य','ta':'பூஜ்யம்','te':'సున్న','kn':'ಶೂನ್ಯ','ml':'പൂജ്യം','bn':'শূন্য','mr':'शून्य','gu':'શૂन्य','pa':'ਜ਼ੀਰੋ','ur':'صفر','ne':'शून्य','sa':'शून्यम्'},
+    '1':{'hi':'एक','ta':'ஒன்று','te':'ఒకటి','kn':'ಒಂದು','ml':'ഒന്ന്','bn':'এক','mr':'एक','gu':'એક','pa':'ਇੱਕ','ur':'ایک','ne':'एक','sa':'एकम्'},
+    '2':{'hi':'दो','ta':'இரண்டு','te':'రెండు','kn':'ಎರಡು','ml':'രണ്ട്','bn':'দুই','mr':'दोन','gu':'બે','pa':'ਦੋ','ur':'دو','ne':'दुई','sa':'द्वे'},
+    '3':{'hi':'तीन','ta':'மூன்று','te':'మూడు','kn':'ಮೂರು','ml':'മൂന്ന്','bn':'তিন','mr':'तीन','gu':'ત્રણ','pa':'ਤਿੰਨ','ur':'تین','ne':'तीन','sa':'त्रीणि'},
+    '4':{'hi':'चार','ta':'நான்கு','te':'నాలుగు','kn':'ನಾಲ್ಕು','ml':'നാല്','bn':'চার','mr':'चार','gu':'ચાર','pa':'ਚਾਰ','ur':'چار','ne':'चार','sa':'चत्वारि'},
+    '5':{'hi':'पाँच','ta':'ஐந்து','te':'అయిదు','kn':'ಐದು','ml':'അഞ്ച്','bn':'পাঁচ','mr':'पाच','gu':'પાંચ','pa':'ਪੰਜ','ur':'پانچ','ne':'पाँच','sa':'पञ्च'},
+    '6':{'hi':'छह','ta':'ஆறு','te':'ఆరు','kn':'ಆರು','ml':'ആറ്','bn':'ছয়','mr':'सहा','gu':'છ','pa':'ਛੇ','ur':'چھ','ne':'छ','sa':'षट्'},
+    '7':{'hi':'सात','ta':'ஏழு','te':'ఏడు','kn':'ಏಳು','ml':'ഏഴ്','bn':'সাত','mr':'सात','gu':'સાત','pa':'ਸੱਤ','ur':'سات','ne':'सात','sa':'सप्त'},
+    '8':{'hi':'आठ','ta':'எட்டு','te':'ఎనిమిది','kn':'ಎಂಟು','ml':'എട്ട്','bn':'আট','mr':'आठ','gu':'આઠ','pa':'ਅੱਠ','ur':'آٹھ','ne':'आठ','sa':'अष्ट'},
+    '9':{'hi':'नौ','ta':'ஒன்பது','te':'తొమ్మిది','kn':'ಒಂಬತ್ತು','ml':'ഒൻപത്','bn':'নয়','mr':'नऊ','gu':'નવ','pa':'ਨੌਂ','ur':'نو','ne':'नौ','sa':'नव'},
+    'a':{'hi':'ए','ta':'ஏ','te':'ఏ','kn':'ಏ','ml':'എ','bn':'এ','mr':'ए','gu':'એ','pa':'ਏ','ur':'اے','ne':'ए','sa':'अ'},
+    'b':{'hi':'बी','ta':'பி','te':'బి','kn':'ಬಿ','ml':'ബി','bn':'বি','mr':'बी','gu':'બી','pa':'ਬੀ','ur':'بی','ne':'बी','sa':'ब'},
+    'c':{'hi':'सी','ta':'சி','te':'సి','kn':'ಸಿ','ml':'സി','bn':'সি','mr':'सी','gu':'સી','pa':'ਸੀ','ur':'سی','ne':'सी','sa':'क'},
+    'd':{'hi':'डी','ta':'டி','te':'డి','kn':'ಡಿ','ml':'ഡി','bn':'ডি','mr':'डी','gu':'ડી','pa':'ਡੀ','ur':'ڈی','ne':'डी','sa':'द'},
+    'e':{'hi':'ई','ta':'இ','te':'ఇ','kn':'ಇ','ml':'ഇ','bn':'ই','mr':'ई','gu':'ઈ','pa':'ਈ','ur':'ای','ne':'ई','sa':'ए'},
+    'f':{'hi':'एफ','ta':'எஃப்','te':'ఎఫ్','kn':'ಎಫ್','ml':'എഫ്','bn':'এফ','mr':'एफ','gu':'એફ','pa':'ਐਫ','ur':'ایف','ne':'एफ','sa':'फ'},
+    'g':{'hi':'जी','ta':'ஜி','te':'జి','kn':'ಜಿ','ml':'ജി','bn':'জি','mr':'जी','gu':'જી','pa':'ਜੀ','ur':'جی','ne':'जी','sa':'ग'},
+    'h':{'hi':'एच','ta':'எச்','te':'హెచ్','kn':'ಎಚ್','ml':'എച്ച്','bn':'এইচ','mr':'एच','gu':'એચ','pa':'ਐਚ','ur':'ایچ','ne':'एच','sa':'ह'},
+    'i':{'hi':'आई','ta':'ஐ','te':'ఐ','kn':'ಐ','ml':'ഐ','bn':'আই','mr':'आई','gu':'આઈ','pa':'ਆਈ','ur':'آئی','ne':'आई','sa':'इ'},
+    'j':{'hi':'जे','ta':'ஜே','te':'జే','kn':'ಜೇ','ml':'ജെ','bn':'জে','mr':'जे','gu':'જે','pa':'ਜੇ','ur':'جے','ne':'जे','sa':'ज'},
+    'k':{'hi':'के','ta':'கே','te':'కే','kn':'ಕೇ','ml':'കെ','bn':'কে','mr':'के','gu':'કે','pa':'ਕੇ','ur':'کے','ne':'के','sa':'क'},
+    'l':{'hi':'एल','ta':'எல்','te':'ఎల్','kn':'ಎಲ್','ml':'എൽ','bn':'এল','mr':'एल','gu':'એલ','pa':'ਐਲ','ur':'ایل','ne':'एल','sa':'ल'},
+    'm':{'hi':'एम','ta':'எம்','te':'ఎమ్','kn':'ಎಂ','ml':'എം','bn':'এম','mr':'एम','gu':'એમ','pa':'ਐਮ','ur':'ایم','ne':'एम','sa':'म'},
+    'n':{'hi':'एन','ta':'என்','te':'ఎన్','kn':'ಎನ್','ml':'എൻ','bn':'এন','mr':'एन','gu':'એन','pa':'ਐਨ','ur':'این','ne':'एन','sa':'न'},
+    'o':{'hi':'ओ','ta':'ஓ','te':'ఓ','kn':'ಓ','ml':'ഓ','bn':'ও','mr':'ओ','gu':'ઓ','pa':'ਓ','ur':'او','ne':'ओ','sa':'ओ'},
+    'p':{'hi':'पी','ta':'பி','te':'పి','kn':'ಪಿ','ml':'പി','bn':'পি','mr':'पी','gu':'પી','pa':'ਪੀ','ur':'پی','ne':'पी','sa':'प'},
+    'q':{'hi':'क्यू','ta':'க்யூ','te':'క్యూ','kn':'ಕ್ಯೂ','ml':'ക്യൂ','bn':'কিউ','mr':'क्यू','gu':'ક્યૂ','pa':'ਕਿਊ','ur':'کیو','ne':'क्यू','sa':'क'},
+    'r':{'hi':'आर','ta':'ஆர்','te':'ఆర్','kn':'ಆರ್','ml':'ആർ','bn':'আর','mr':'आर','gu':'આર','pa':'ਆਰ','ur':'آر','ne':'आर','sa':'र'},
+    's':{'hi':'एस','ta':'எஸ்','te':'ఎస్','kn':'ಎಸ್','ml':'എസ്','bn':'এস','mr':'एस','gu':'એસ','pa':'ਐਸ','ur':'ایس','ne':'एस','sa':'स'},
+    't':{'hi':'टी','ta':'டி','te':'టి','kn':'ಟಿ','ml':'ടി','bn':'টি','mr':'टी','gu':'ટી','pa':'ਟੀ','ur':'ٹی','ne':'टी','sa':'त'},
+    'u':{'hi':'यू','ta':'யூ','te':'యూ','kn':'ಯೂ','ml':'യൂ','bn':'ইউ','mr':'यू','gu':'યૂ','pa':'ਯੂ','ur':'یو','ne':'यू','sa':'उ'},
+    'v':{'hi':'वी','ta':'வி','te':'వి','kn':'ವಿ','ml':'വി','bn':'ভি','mr':'वी','gu':'વી','pa':'ਵੀ','ur':'وی','ne':'वी','sa':'व'},
+    'w':{'hi':'डब्लू','ta':'டபிள்யூ','te':'డబ్ల్యూ','kn':'ಡಬ್ಲ್ಯೂ','ml':'ഡബ്ല്യൂ','bn':'ডাবলিউ','mr':'डब्ल्यू','gu':'ડબ્લ્યૂ','pa':'ਡਬਲਯੂ','ur':'ڈبلیو','ne':'डब्लू','sa':'व'},
+    'x':{'hi':'एक्स','ta':'எக்ஸ்','te':'ఎక్స్','kn':'ಎಕ್ಸ್','ml':'എക്സ്','bn':'এক্স','mr':'एक्स','gu':'એક્સ','pa':'ਐਕਸ','ur':'ایکس','ne':'एक्स','sa':'क्ष'},
+    'y':{'hi':'वाई','ta':'வை','te':'వై','kn':'ವೈ','ml':'വൈ','bn':'ওয়াই','mr':'वाय','gu':'વાય','pa':'ਵਾਈ','ur':'وائی','ne':'वाई','sa':'य'},
+    'z':{'hi':'ज़ेड','ta':'ஜெட்','te':'జెడ్','kn':'ಝೆಡ್','ml':'സെഡ്','bn':'জেড','mr':'झेड','gu':'ઝેડ','pa':'ਜ਼ੈੱਡ','ur':'زیڈ','ne':'जेड','sa':'ज'},
+    'after':{'hi':'बाद में','ta':'பிறகு','te':'తర్వాత','kn':'ನಂತರ','ml':'ശേഷം','bn':'পরে','mr':'नंतर','gu':'પછी','pa':'ਬਾਅਦ','ur':'بعد میں','ne':'पछि','sa':'पश्चात्'},
+    'again':{'hi':'फिर','ta':'மீண்டும்','te':'మళ్ళీ','kn':'ಮತ್ತೆ','ml':'വീണ്ടും','bn':'আবার','mr':'पुन्हा','gu':'ફरी','pa':'ਫਿਰ','ur':'پھر','ne':'फेरि','sa':'पुनः'},
+    'against':{'hi':'खिलाफ','ta':'எதிராக','te':'వ్యతిరేకంగా','kn':'ವಿರುದ್ಧ','ml':'എതിരായി','bn':'বিরুদ্ধে','mr':'विरुद्ध','gu':'વિरुद्ध','pa':'ਵਿਰੁੱਧ','ur':'خلاف','ne':'विरुद्ध','sa':'विरुद्धम्'},
+    'age':{'hi':'उम्र','ta':'வயது','te':'వయసు','kn':'ವಯಸ್ಸು','ml':'പ്രായം','bn':'বয়স','mr':'वय','gu':'ઉंमर','pa':'ਉਮਰ','ur':'عمر','ne':'उमेर','sa':'वयः'},
+    'all':{'hi':'सब','ta':'அனைத்தும்','te':'అన్నీ','kn':'ಎಲ್ಲಾ','ml':'എല്ലാം','bn':'সব','mr':'सर्व','gu':'બधुं','pa':'ਸਭ','ur':'سب','ne':'सबै','sa':'सर्वम्'},
+    'alone':{'hi':'अकेला','ta':'தனியாக','te':'ఒంటరిగా','kn':'ಒಂಟಿಯಾಗಿ','ml':'ഒറ്റയ്ക്ക്','bn':'একা','mr':'एकटे','gu':'એकला','pa':'ਇਕੱਲਾ','ur':'اکیلا','ne':'एक्लै','sa':'एकाकी'},
+    'also':{'hi':'भी','ta':'மேலும்','te':'కూడా','kn':'ಸಹ','ml':'കൂടി','bn':'এছাড়াও','mr':'सुद्धा','gu':'પण','pa':'ਵੀ','ur':'بھی','ne':'पनि','sa':'अपि'},
+    'and':{'hi':'और','ta':'மற்றும்','te':'మరియు','kn':'ಮತ್ತು','ml':'ഒപ്പം','bn':'এবং','mr':'आणि','gu':'અने','pa':'ਅਤੇ','ur':'اور','ne':'र','sa':'च'},
+    'ask':{'hi':'पूछो','ta':'கேளுங்கள்','te':'అడగండి','kn':'ಕೇಳಿ','ml':'ചോദിക്കൂ','bn':'জিজ্ঞেস করো','mr':'विचारा','gu':'પूछो','pa':'ਪੁੱਛੋ','ur':'پوچھو','ne':'सोध','sa':'पृच्छ'},
+    'at':{'hi':'पर','ta':'இல்','te':'వద్ద','kn':'ನಲ್ಲಿ','ml':'ൽ','bn':'এ','mr':'येथे','gu':'પर','pa':'ਤੇ','ur':'پر','ne':'मा','sa':'स्थाने'},
+    'be':{'hi':'होना','ta':'இருக்க','te':'ఉండు','kn':'ಇರು','ml':'ആകുക','bn':'হওয়া','mr':'असणे','gu':'હोवुं','pa':'ਹੋਣਾ','ur':'ہونا','ne':'हुनु','sa':'भव'},
+    'beautiful':{'hi':'सुंदर','ta':'அழகான','te':'అందమైన','kn':'ಸುಂದರ','ml':'സുന്ദരമായ','bn':'সুন্দর','mr':'सुंदर','gu':'સुंदर','pa':'ਸੁੰਦਰ','ur':'خوبصورت','ne':'सुन्दर','sa':'सुन्दरम्'},
+    'before':{'hi':'पहले','ta':'முன்பு','te':'ముందు','kn':'ಮೊದಲು','ml':'മുമ്പ്','bn':'আগে','mr':'आधी','gu':'પहेला','pa':'ਪਹਿਲਾਂ','ur':'پہلے','ne':'पहिले','sa':'पूर्वम्'},
+    'best':{'hi':'सबसे अच्छा','ta':'சிறந்த','te':'అత్యుత్తమ','kn':'ಅತ್ಯುತ್ತಮ','ml':'ഏറ്റവും നല്ലത്','bn':'সেরা','mr':'सर्वोत्तम','gu':'શ्रेष्ठ','pa':'ਸਭ ਤੋਂ ਵਧੀਆ','ur':'بہترین','ne':'सर्वोत्तम','sa':'श्रेष्ठम्'},
+    'better':{'hi':'बेहतर','ta':'சிறப்பான','te':'మెరుగైన','kn':'ಉತ್ತಮ','ml':'മികച്ചത്','bn':'ভালো','mr':'चांगले','gu':'વधु सारुं','pa':'ਬਿਹਤਰ','ur':'بہتر','ne':'राम्रो','sa':'श्रेयः'},
+    'busy':{'hi':'व्यस्त','ta':'பிஸி','te':'బిజీ','kn':'ಬ್ಯುಸಿ','ml':'തിരക്കുള്ള','bn':'ব্যস্ত','mr':'व्यस्त','gu':'વ्यस्त','pa':'ਰੁੱਝਿਆ','ur':'مصروف','ne':'व्यस्त','sa':'व्यग्रः'},
+    'but':{'hi':'लेकिन','ta':'ஆனால்','te':'కానీ','kn':'ಆದರೆ','ml':'പക്ഷേ','bn':'কিন্তু','mr':'पण','gu':'પण','pa':'ਪਰ','ur':'لیکن','ne':'तर','sa':'किन्तु'},
+    'bye':{'hi':'अलविदा','ta':'பை','te':'బై','kn':'ಬೈ','ml':'ബൈ','bn':'বিদায়','mr':'निरोप','gu':'આवजो','pa':'ਅਲਵਿਦਾ','ur':'خدا حافظ','ne':'बिदाई','sa':'विदाय'},
+    'can':{'hi':'कर सकते हैं','ta':'முடியும்','te':'చేయగలను','kn':'ಮಾಡಬಹುದು','ml':'കഴിയും','bn':'পারি','mr':'करू शकतो','gu':'કरी शको','pa':'ਕਰ ਸਕਦੇ','ur':'کر سکتے','ne':'सक्छु','sa':'शक्नोमि'},
+    'cannot':{'hi':'नहीं कर सकते','ta':'முடியாது','te':'చేయలేను','kn':'ಮಾಡಲಾರೆ','ml':'കഴിയില്ല','bn':'পারি না','mr':'करू शकत नाही','gu':'કरी शकता नथी','pa':'ਨਹੀਂ ਕਰ ਸਕਦੇ','ur':'نہیں کر سکتے','ne':'सक्दिन','sa':'न शक्नोमि'},
+    'change':{'hi':'बदलाव','ta':'மாற்றம்','te':'మార్పు','kn':'ಬದಲಾವಣೆ','ml':'മാറ്റം','bn':'পরিবর্তন','mr':'बदल','gu':'ફेरफार','pa':'ਬਦਲਾਅ','ur':'تبدیلی','ne':'परिवर्तन','sa':'परिवर्तनम्'},
+    'college':{'hi':'कॉलेज','ta':'கல்லூரி','te':'కళాశాల','kn':'ಕಾಲೇಜು','ml':'കോളേജ്','bn':'কলেজ','mr':'महाविद्यालय','gu':'કॉलेज','pa':'ਕਾਲਜ','ur':'کالج','ne':'कलेज','sa':'महाविद्यालयः'},
+    'come':{'hi':'आओ','ta':'வாருங்கள்','te':'రండి','kn':'ಬನ್ನಿ','ml':'വരൂ','bn':'আসো','mr':'या','gu':'આवो','pa':'ਆਓ','ur':'آؤ','ne':'आउ','sa':'आगच्छ'},
+    'computer':{'hi':'कंप्यूटर','ta':'கணினி','te':'కంప్యూటర్','kn':'ಕಂಪ್ಯೂಟರ್','ml':'കമ്പ്യൂട്ടർ','bn':'কম্পিউটার','mr':'संगणक','gu':'કम्प्युटर','pa':'ਕੰਪਿਊਟਰ','ur':'کمپیوٹر','ne':'कम्प्युटर','sa':'संगणकः'},
+    'day':{'hi':'दिन','ta':'நாள்','te':'రోజు','kn':'ದಿನ','ml':'ദിവസം','bn':'দিন','mr':'दिवस','gu':'દिवस','pa':'ਦਿਨ','ur':'دن','ne':'दिन','sa':'दिनम्'},
+    'distance':{'hi':'दूरी','ta':'தூரம்','te':'దూరం','kn':'ದೂರ','ml':'ദൂരം','bn':'দূরত্ব','mr':'अंतर','gu':'અंतर','pa':'ਦੂਰੀ','ur':'فاصلہ','ne':'दूरी','sa':'दूरम्'},
+    'do':{'hi':'करो','ta':'செய்','te':'చేయి','kn':'ಮಾಡು','ml':'ചെയ്യൂ','bn':'করো','mr':'करा','gu':'કरो','pa':'ਕਰੋ','ur':'کرو','ne':'गर','sa':'कुरु'},
+    'do_not':{'hi':'मत करो','ta':'செய்யாதே','te':'చేయకు','kn':'ಮಾಡಬೇಡ','ml':'ചെയ്യരുത്','bn':'করো না','mr':'करू नका','gu':'ન करो','pa':'ਨਾ ਕਰੋ','ur':'مت کرو','ne':'नगर','sa':'न कुरु'},
+    'does_not':{'hi':'नहीं करता','ta':'செய்வதில்லை','te':'చేయడు','kn':'ಮಾಡುವುದಿಲ್ಲ','ml':'ചെയ്യുന്നില്ല','bn':'করে না','mr':'करत नाही','gu':'કरता नथी','pa':'ਨਹੀਂ ਕਰਦਾ','ur':'نہیں کرتا','ne':'गर्दैन','sa':'न करोति'},
+    'eat':{'hi':'खाओ','ta':'சாப்பிடு','te':'తినండి','kn':'ತಿನ್ನು','ml':'കഴിക്കൂ','bn':'খাও','mr':'खा','gu':'ખाओ','pa':'ਖਾਓ','ur':'کھاؤ','ne':'खाउ','sa':'भक्षय'},
+    'engineer':{'hi':'इंजीनियर','ta':'பொறியாளர்','te':'ఇంజినీర్','kn':'ಎಂಜಿನಿಯರ್','ml':'എൻജിനീയർ','bn':'প্রকৌশলী','mr':'अभियंता','gu':'ઇजनेर','pa':'ਇੰਜੀਨੀਅਰ','ur':'انجینئر','ne':'इन्जिनियर','sa':'यन्त्रज्ञः'},
+    'fight':{'hi':'लड़ाई','ta':'சண்டை','te':'పోరాటం','kn':'ಜಗಳ','ml':'വഴക്ക്','bn':'ঝগড়া','mr':'भांडण','gu':'ઝगडो','pa':'ਲੜਾਈ','ur':'لڑائی','ne':'झगडा','sa':'युद्धम्'},
+    'finish':{'hi':'खत्म','ta':'முடித்துவிட்டது','te':'పూర్తయింది','kn':'ಮುಗಿದಿದೆ','ml':'കഴിഞ്ഞു','bn':'শেষ','mr':'संपले','gu':'પूर्ण','pa':'ਖਤਮ','ur':'ختم','ne':'सकियो','sa':'समाप्तम्'},
+    'from':{'hi':'से','ta':'இருந்து','te':'నుండి','kn':'ನಿಂದ','ml':'നിന്ന്','bn':'থেকে','mr':'पासून','gu':'थी','pa':'ਤੋਂ','ur':'سے','ne':'बाट','sa':'तः'},
+    'glitter':{'hi':'चमक','ta':'மின்னல்','te':'మెరుపు','kn':'ಹೊಳಪು','ml':'തിളക്കം','bn':'ঝলমলে','mr':'चमक','gu':'ચळकाट','pa':'ਚਮਕ','ur':'چمک','ne':'चमक','sa':'दीप्तिः'},
+    'go':{'hi':'जाओ','ta':'போ','te':'వెళ్ళు','kn':'ಹೋಗು','ml':'പോകൂ','bn':'যাও','mr':'जा','gu':'જाओ','pa':'ਜਾਓ','ur':'جاؤ','ne':'जाउ','sa':'गच्छ'},
+    'god':{'hi':'भगवान','ta':'கடவுள்','te':'భగవంతుడు','kn':'ದೇವರು','ml':'ദൈവം','bn':'ঈশ্বর','mr':'देव','gu':'ભगवान','pa':'ਰੱਬ','ur':'خدا','ne':'भगवान','sa':'देवः'},
+    'gold':{'hi':'सोना','ta':'தங்கம்','te':'బంగారం','kn':'ಚಿನ್ನ','ml':'സ്വർണ്ണം','bn':'সোনা','mr':'सोने','gu':'સोनुं','pa':'ਸੋਨਾ','ur':'سونا','ne':'सुन','sa':'सुवर्णम्'},
+    'good':{'hi':'अच्छा','ta':'நல்லது','te':'మంచిది','kn':'ಒಳ್ಳೆಯದು','ml':'നല്ലത്','bn':'ভালো','mr':'चांगले','gu':'સारुं','pa':'ਚੰਗਾ','ur':'اچھا','ne':'राम्रो','sa':'शोभनम्'},
+    'great':{'hi':'महान','ta':'சிறந்த','te':'గొప్ప','kn':'ಮಹಾನ್','ml':'മഹാൻ','bn':'মহান','mr':'महान','gu':'મहान','pa':'ਮਹਾਨ','ur':'عظیم','ne':'महान','sa':'महान्'},
+    'hand':{'hi':'हाथ','ta':'கை','te':'చేయి','kn':'ಕೈ','ml':'കൈ','bn':'হাত','mr':'हात','gu':'હाथ','pa':'ਹੱਥ','ur':'ہاتھ','ne':'हात','sa':'हस्तः'},
+    'hands':{'hi':'हाथ','ta':'கைகள்','te':'చేతులు','kn':'ಕೈಗಳು','ml':'കൈകൾ','bn':'হাতগুলো','mr':'हात','gu':'હाथ','pa':'ਹੱਥ','ur':'ہاتھ','ne':'हातहरू','sa':'हस्तौ'},
+    'happy':{'hi':'खुश','ta':'மகிழ்ச்சியான','te':'సంతోషంగా','kn':'ಸಂತೋಷ','ml':'സന്തോഷം','bn':'খুশি','mr':'आनंदी','gu':'ખुश','pa':'ਖੁਸ਼','ur':'خوش','ne':'खुसी','sa':'प्रसन्नः'},
+    'hello':{'hi':'नमस्ते','ta':'வணக்கம்','te':'నమస్కారం','kn':'ನಮಸ್ಕಾರ','ml':'നമസ്കാരം','bn':'নমস্কার','mr':'नमस्कार','gu':'નमस्ते','pa':'ਸਤਿ ਸ੍ਰੀ ਅਕਾਲ','ur':'السلام علیکم','ne':'नमस्ते','sa':'नमस्ते'},
+    'help':{'hi':'मदद','ta':'உதவி','te':'సహాయం','kn':'ಸಹಾಯ','ml':'സഹായം','bn':'সাহায্য','mr':'मदत','gu':'મदद','pa':'ਮਦਦ','ur':'مدد','ne':'मद्दत','sa':'सहाय'},
+    'her':{'hi':'उसकी','ta':'அவளுடைய','te':'ఆమె','kn':'ಅವಳ','ml':'അവൾ','bn':'তার','mr':'तिची','gu':'તेणी','pa':'ਉਸਦੀ','ur':'اس کی','ne':'उनको','sa':'तस्याः'},
+    'here':{'hi':'यहाँ','ta':'இங்கே','te':'ఇక్కడ','kn':'ಇಲ್ಲಿ','ml':'ഇവിടെ','bn':'এখানে','mr':'इथे','gu':'અहीं','pa':'ਇੱਥੇ','ur':'یہاں','ne':'यहाँ','sa':'अत्र'},
+    'his':{'hi':'उसका','ta':'அவனுடைய','te':'అతను','kn':'ಅವನ','ml':'അവൻ','bn':'তার','mr':'त्याचे','gu':'તेनुं','pa':'ਉਸਦਾ','ur':'اس کا','ne':'उनको','sa':'तस्य'},
+    'home':{'hi':'घर','ta':'வீடு','te':'ఇల్లు','kn':'ಮನೆ','ml':'വീട്','bn':'বাড়ি','mr':'घर','gu':'ઘर','pa':'ਘਰ','ur':'گھر','ne':'घर','sa':'गृहम्'},
+    'homepage':{'hi':'होमपेज','ta':'முகப்பு','te':'హోమ్ పేజ్','kn':'ಮುಖಪುಟ','ml':'ഹോം പേജ്','bn':'হোমপেজ','mr':'मुखपृष्ठ','gu':'હोम पेज','pa':'ਹੋਮ ਪੇਜ','ur':'ہوم پیج','ne':'होमपेज','sa':'मुखपृष्ठम्'},
+    'how':{'hi':'कैसे','ta':'எப்படி','te':'ఎలా','kn':'ಹೇಗೆ','ml':'എങ്ങനെ','bn':'কিভাবে','mr':'कसे','gu':'કेवी रीते','pa':'ਕਿਵੇਂ','ur':'کیسے','ne':'कसरी','sa':'कथम्'},
+    'invent':{'hi':'आविष्कार','ta':'கண்டுபிடி','te':'కనుగొను','kn':'ಆವಿಷ್ಕರಿಸು','ml':'കണ്ടുപിടിക്കൂ','bn':'আবিষ্কার','mr':'शोध','gu':'શोध','pa':'ਖੋਜ','ur':'ایجاد','ne':'आविष्कार','sa':'आविष्कृ'},
+    'it':{'hi':'यह','ta':'அது','te':'అది','kn':'ಅದು','ml':'അത്','bn':'এটা','mr':'ते','gu':'તे','pa':'ਇਹ','ur':'یہ','ne':'यो','sa':'तत्'},
+    'keep':{'hi':'रखो','ta':'வைத்திரு','te':'ఉంచు','kn':'ಇಟ್ಟುಕೋ','ml':'സൂക്ഷിക്കൂ','bn':'রাখো','mr':'ठेवा','gu':'રाखो','pa':'ਰੱਖੋ','ur':'رکھو','ne':'राख','sa':'रक्ष'},
+    'language':{'hi':'भाषा','ta':'மொழி','te':'భాష','kn':'ಭಾಷೆ','ml':'ഭാഷ','bn':'ভাষা','mr':'भाषा','gu':'ભाषा','pa':'ਭਾਸ਼ਾ','ur':'زبان','ne':'भाषा','sa':'भाषा'},
+    'laugh':{'hi':'हँसो','ta':'சிரி','te':'నవ్వు','kn':'ನಗು','ml':'ചിരിക്കൂ','bn':'হাসো','mr':'हस','gu':'હसो','pa':'ਹੱਸੋ','ur':'ہنسو','ne':'हाँस','sa':'हस'},
+    'learn':{'hi':'सीखो','ta':'கற்றுக்கொள்','te':'నేర్చుకో','kn':'ಕಲಿ','ml':'പഠിക്കൂ','bn':'শিখো','mr':'शिका','gu':'શीखो','pa':'ਸਿੱਖੋ','ur':'سیکھو','ne':'सिक','sa':'शिक्षस्व'},
+    'me':{'hi':'मुझे','ta':'என்னை','te':'నన్ను','kn':'ನನ್ನನ್ನು','ml':'എന്നെ','bn':'আমাকে','mr':'मला','gu':'મने','pa':'ਮੈਨੂੰ','ur':'مجھے','ne':'मलाई','sa':'माम्'},
+    'more':{'hi':'और अधिक','ta':'மேலும்','te':'మరింత','kn':'ಇನ್ನಷ್ಟು','ml':'കൂടുതൽ','bn':'আরও','mr':'अधिक','gu':'વधु','pa':'ਹੋਰ','ur':'مزید','ne':'थप','sa':'अधिकम्'},
+    'my':{'hi':'मेरा','ta':'என்னுடைய','te':'నా','kn':'ನನ್ನ','ml':'എന്റെ','bn':'আমার','mr':'माझे','gu':'મारुं','pa':'ਮੇਰਾ','ur':'میرا','ne':'मेरो','sa':'मम'},
+    'name':{'hi':'नाम','ta':'பெயர்','te':'పేరు','kn':'ಹೆಸರು','ml':'പേര്','bn':'নাম','mr':'नाव','gu':'નाम','pa':'ਨਾਮ','ur':'نام','ne':'नाम','sa':'नाम'},
+    'next':{'hi':'अगला','ta':'அடுத்த','te':'తదుపరి','kn':'ಮುಂದಿನ','ml':'അടുത്ത','bn':'পরবর্তী','mr':'पुढील','gu':'આगळ','pa':'ਅਗਲਾ','ur':'اگلا','ne':'अर्को','sa':'अग्रिमम्'},
+    'not':{'hi':'नहीं','ta':'இல்லை','te':'కాదు','kn':'ಇಲ್ಲ','ml':'ഇല്ല','bn':'না','mr':'नाही','gu':'નहीं','pa':'ਨਹੀਂ','ur':'نہیں','ne':'होइन','sa':'न'},
+    'now':{'hi':'अभी','ta':'இப்போது','te':'ఇప్పుడు','kn':'ಈಗ','ml':'ഇപ്പോൾ','bn':'এখন','mr':'आत्ता','gu':'હवे','pa':'ਹੁਣ','ur':'ابھی','ne':'अहिले','sa':'अधुना'},
+    'of':{'hi':'का','ta':'இன்','te':'యొక్క','kn':'ಇನ್','ml':'ന്റെ','bn':'এর','mr':'चा','gu':'નो','pa':'ਦਾ','ur':'کا','ne':'को','sa':'इति'},
+    'on':{'hi':'पर','ta':'மீது','te':'పై','kn':'ಮೇಲೆ','ml':'മേൽ','bn':'উপর','mr':'वर','gu':'પर','pa':'ਉੱਤੇ','ur':'پر','ne':'मा','sa':'उपरि'},
+    'our':{'hi':'हमारा','ta':'எங்களுடைய','te':'మన','kn':'ನಮ್ಮ','ml':'നമ്മുടെ','bn':'আমাদের','mr':'आमचे','gu':'આपणुं','pa':'ਸਾਡਾ','ur':'ہمارا','ne':'हाम्रो','sa':'अस्माकम्'},
+    'out':{'hi':'बाहर','ta':'வெளியே','te':'బయట','kn':'ಹೊರಗೆ','ml':'പുറത്ത്','bn':'বাইরে','mr':'बाहेर','gu':'બहार','pa':'ਬਾਹਰ','ur':'باہر','ne':'बाहिर','sa':'बहिः'},
+    'pretty':{'hi':'सुंदर','ta':'அழகான','te':'అందమైన','kn':'ಸುಂದರ','ml':'സുന്ദരി','bn':'সুন্দর','mr':'छान','gu':'સुंदर','pa':'ਸੋਹਣਾ','ur':'خوبصورت','ne':'सुन्दर','sa':'सुन्दरम्'},
+    'right':{'hi':'सही','ta':'சரி','te':'సరైన','kn':'ಸರಿ','ml':'ശരി','bn':'ঠিক','mr':'बरोबर','gu':'સाचुं','pa':'ਸਹੀ','ur':'صحیح','ne':'सही','sa':'सत्यम्'},
+    'sad':{'hi':'दुखी','ta':'சோகமான','te':'దుఃఖంగా','kn':'ದುಃಖ','ml':'സങ്കടം','bn':'দুঃখিত','mr':'दुःखी','gu':'દुःखी','pa':'ਉਦਾਸ','ur':'اداس','ne':'दुखी','sa':'दुःखितः'},
+    'safe':{'hi':'सुरक्षित','ta':'பாதுகாப்பான','te':'సురక్షితంగా','kn':'ಸುರಕ್ಷಿತ','ml':'സുരക്ഷിതം','bn':'নিরাপদ','mr':'सुरक्षित','gu':'સुरक्षित','pa':'ਸੁਰੱਖਿਅਤ','ur':'محفوظ','ne':'सुरक्षित','sa':'सुरक्षितम्'},
+    'see':{'hi':'देखो','ta':'பார்','te':'చూడు','kn':'ನೋಡು','ml':'കാണൂ','bn':'দেখো','mr':'बघा','gu':'જुओ','pa':'ਵੇਖੋ','ur':'دیکھو','ne':'हेर','sa':'पश्य'},
+    'self':{'hi':'खुद','ta':'தன்னை','te':'తానే','kn':'ತಾನೇ','ml':'സ്വയം','bn':'নিজে','mr':'स्वतः','gu':'જाते','pa':'ਆਪ','ur':'خود','ne':'आफू','sa':'स्वयम्'},
+    'sign':{'hi':'संकेत','ta':'சைகை','te':'సంకేతం','kn':'ಸಂಕೇತ','ml':'ആംഗ്യം','bn':'সাইন','mr':'खूण','gu':'સंकेत','pa':'ਸੰਕੇਤ','ur':'اشارہ','ne':'संकेत','sa':'संकेतः'},
+    'sing':{'hi':'गाओ','ta':'பாடு','te':'పాడు','kn':'ಹಾಡು','ml':'പാടൂ','bn':'গাও','mr':'गा','gu':'ગाओ','pa':'ਗਾਓ','ur':'گاؤ','ne':'गाउ','sa':'गा'},
+    'so':{'hi':'तो','ta':'அதனால்','te':'కాబట్టి','kn':'ಹಾಗಾಗಿ','ml':'അതിനാൽ','bn':'তাই','mr':'म्हणून','gu':'તो','pa':'ਇਸ ਲਈ','ur':'تو','ne':'त्यसैले','sa':'अतः'},
+    'sound':{'hi':'आवाज','ta':'ஒலி','te':'శబ్దం','kn':'ಶಬ್ದ','ml':'ശബ്ദം','bn':'শব্দ','mr':'आवाज','gu':'અवाज','pa':'ਆਵਾਜ਼','ur':'آواز','ne':'आवाज','sa':'शब्दः'},
+    'stay':{'hi':'रुको','ta':'இரு','te':'ఉండు','kn':'ಇರು','ml':'നിൽക്കൂ','bn':'থাকো','mr':'थांबा','gu':'રहो','pa':'ਰਹੋ','ur':'رکو','ne':'बस','sa':'तिष्ठ'},
+    'study':{'hi':'पढ़ो','ta':'படி','te':'చదువు','kn':'ಓದು','ml':'പഠിക്കൂ','bn':'পড়ো','mr':'अभ्यास','gu':'ભणो','pa':'ਪੜ੍ਹੋ','ur':'پڑھو','ne':'पढ','sa':'अधीष्व'},
+    'talk':{'hi':'बात करो','ta':'பேசு','te':'మాట్లాడు','kn':'ಮಾತನಾಡು','ml':'സംസാരിക്കൂ','bn':'কথা বলো','mr':'बोला','gu':'વात करो','pa':'ਗੱਲ ਕਰੋ','ur':'بات کرو','ne':'कुरा गर','sa':'वद'},
+    'television':{'hi':'टेलीविजन','ta':'தொலைக்காட்சி','te':'టెలివిజన్','kn':'ದೂರದರ್ಶನ','ml':'ടെലിവിഷൻ','bn':'টেলিভিশন','mr':'दूरचित्रवाणी','gu':'ટेलिविझन','pa':'ਟੈਲੀਵਿਜ਼ਨ','ur':'ٹیلی ویژن','ne':'टेलिभिजन','sa':'दूरदर्शनम्'},
+    'thank':{'hi':'धन्यवाद','ta':'நன்றி','te':'ధన్యవాదాలు','kn':'ಧನ್ಯವಾದ','ml':'നന്ദി','bn':'ধন্যবাদ','mr':'धन्यवाद','gu':'આभार','pa':'ਧੰਨਵਾਦ','ur':'شکریہ','ne':'धन्यवाद','sa':'धन्यवादः'},
+    'thank_you':{'hi':'धन्यवाद','ta':'நன்றி','te':'ధన్యవాదాలు','kn':'ಧನ್ಯವಾದ','ml':'നന്ദി','bn':'ধন্যবাদ','mr':'धन्यवाद','gu':'આभार','pa':'ਧੰਨਵਾਦ','ur':'شکریہ','ne':'धन्यवाद','sa':'धन्यवादः'},
+    'that':{'hi':'वह','ta':'அது','te':'అది','kn':'ಅದು','ml':'അത്','bn':'ওটা','mr':'ते','gu':'તे','pa':'ਉਹ','ur':'وہ','ne':'त्यो','sa':'तत्'},
+    'they':{'hi':'वे','ta':'அவர்கள்','te':'వారు','kn':'ಅವರು','ml':'അവർ','bn':'তারা','mr':'ते','gu':'તेओ','pa':'ਉਹ','ur':'وہ','ne':'उनीहरू','sa':'ते'},
+    'this':{'hi':'यह','ta':'இது','te':'ఇది','kn':'ಇದು','ml':'ഇത്','bn':'এটা','mr':'हे','gu':'આ','pa':'ਇਹ','ur':'یہ','ne':'यो','sa':'इदम्'},
+    'those':{'hi':'वे','ta':'அவை','te':'అవి','kn':'ಅವು','ml':'അവ','bn':'ওগুলো','mr':'ते','gu':'તे','pa':'ਉਹ','ur':'وہ','ne':'ती','sa':'तानि'},
+    'time':{'hi':'समय','ta':'நேரம்','te':'సమయం','kn':'ಸಮಯ','ml':'സമയം','bn':'সময়','mr':'वेळ','gu':'સमय','pa':'ਸਮਾਂ','ur':'وقت','ne':'समय','sa':'समयः'},
+    'to':{'hi':'को','ta':'க்கு','te':'కి','kn':'ಗೆ','ml':'ക്ക്','bn':'কে','mr':'ला','gu':'ને','pa':'ਨੂੰ','ur':'کو','ne':'लाई','sa':'प्रति'},
+    'type':{'hi':'टाइप करो','ta':'தட்டச்சு','te':'టైప్ చేయి','kn':'ಟೈಪ್ ಮಾಡು','ml':'ടൈപ്പ് ചെയ്യൂ','bn':'টাইপ করো','mr':'टाईप करा','gu':'ટाइप करो','pa':'ਟਾਈਪ ਕਰੋ','ur':'ٹائپ کرو','ne':'टाइप गर','sa':'लेख'},
+    'us':{'hi':'हमें','ta':'எங்களை','te':'మనకు','kn':'ನಮಗೆ','ml':'നമ്മൾ','bn':'আমাদের','mr':'आम्हाला','gu':'આपणने','pa':'ਸਾਨੂੰ','ur':'ہمیں','ne':'हामीलाई','sa':'अस्मान्'},
+    'walk':{'hi':'चलो','ta':'நடை','te':'నడవు','kn':'ನಡೆ','ml':'നടക്കൂ','bn':'হাঁটো','mr':'चाला','gu':'ચालो','pa':'ਚੱਲੋ','ur':'چلو','ne':'हिँड','sa':'गच्छ'},
+    'wash':{'hi':'धोओ','ta':'கழுவு','te':'కడుగు','kn':'ತೊಳೆ','ml':'കഴുകൂ','bn':'ধুয়ে নাও','mr':'धुवा','gu':'ધोओ','pa':'ਧੋਵੋ','ur':'دھوو','ne':'धोउ','sa':'प्रक्षाल'},
+    'way':{'hi':'रास्ता','ta':'வழி','te':'మార్గం','kn':'ದಾರಿ','ml':'വഴി','bn':'পথ','mr':'मार्ग','gu':'રस्तो','pa':'ਰਸਤਾ','ur':'راستہ','ne':'बाटो','sa':'मार्गः'},
+    'we':{'hi':'हम','ta':'நாங்கள்','te':'మేము','kn':'ನಾವು','ml':'നാം','bn':'আমরা','mr':'आम्ही','gu':'આपणे','pa':'ਅਸੀਂ','ur':'ہم','ne':'हामी','sa':'वयम्'},
+    'welcome':{'hi':'स्वागत','ta':'வரவேற்கிறோம்','te':'స్వాగతం','kn':'ಸ್ವಾಗತ','ml':'സ്വാഗതം','bn':'স্বাগতম','mr':'स्वागत','gu':'સ्वागत','pa':'ਜੀ ਆਇਆਂ ਨੂੰ','ur':'خوش آمدید','ne':'स्वागतम्','sa':'स्वागतम्'},
+    'what':{'hi':'क्या','ta':'என்ன','te':'ఏమిటి','kn':'ಏನು','ml':'എന്ത്','bn':'কি','mr':'काय','gu':'શुं','pa':'ਕੀ','ur':'کیا','ne':'के','sa':'किम्'},
+    'when':{'hi':'कब','ta':'எப்போது','te':'ఎప్పుడు','kn':'ಯಾವಾಗ','ml':'എപ്പോൾ','bn':'কখন','mr':'केव्हा','gu':'ક्यारे','pa':'ਕਦੋਂ','ur':'کب','ne':'कहिले','sa':'कदा'},
+    'where':{'hi':'कहाँ','ta':'எங்கே','te':'ఎక్కడ','kn':'ಎಲ್ಲಿ','ml':'എവിടെ','bn':'কোথায়','mr':'कुठे','gu':'ક्यां','pa':'ਕਿੱਥੇ','ur':'کہاں','ne':'कहाँ','sa':'कुत्र'},
+    'which':{'hi':'कौन सा','ta':'எது','te':'ఏది','kn':'ಯಾವುದು','ml':'ഏത്','bn':'কোনটি','mr':'कोणता','gu':'કयो','pa':'ਕਿਹੜਾ','ur':'کون سا','ne':'कुन','sa':'कः'},
+    'who':{'hi':'कौन','ta':'யார்','te':'ఎవరు','kn':'ಯಾರು','ml':'ആർ','bn':'কে','mr':'कोण','gu':'કोण','pa':'ਕੌਣ','ur':'کون','ne':'को','sa':'कः'},
+    'whole':{'hi':'पूरा','ta':'முழு','te':'మొత్తం','kn':'ಸಂಪೂರ್ಣ','ml':'മുഴുവൻ','bn':'পুরো','mr':'संपूर्ण','gu':'આखुं','pa':'ਪੂਰਾ','ur':'پورا','ne':'पूरै','sa':'सम्पूर्णम्'},
+    'whose':{'hi':'किसका','ta':'யாருடைய','te':'ఎవరిది','kn':'ಯಾರದ್ದು','ml':'ആരുടേത്','bn':'কার','mr':'कोणाचे','gu':'કोनुं','pa':'ਕਿਸਦਾ','ur':'کس کا','ne':'कसको','sa':'कस्य'},
+    'why':{'hi':'क्यों','ta':'ஏன்','te':'ఎందుకు','kn':'ಯಾಕೆ','ml':'എന്തുകൊണ്ട്','bn':'কেন','mr':'का','gu':'કेम','pa':'ਕਿਉਂ','ur':'کیوں','ne':'किन','sa':'कस्मात्'},
+    'will':{'hi':'करेंगे','ta':'செய்வேன்','te':'చేస్తాను','kn':'ಮಾಡುತ್ತೇನೆ','ml':'ചെയ്യും','bn':'করব','mr':'करेल','gu':'કरशे','pa':'ਕਰੇਗਾ','ur':'کریں گے','ne':'गर्नेछु','sa':'करिष्यामि'},
+    'with':{'hi':'साथ','ta':'உடன்','te':'తో','kn':'ಜೊತೆ','ml':'ഒപ്പം','bn':'সাথে','mr':'सोबत','gu':'સाथे','pa':'ਨਾਲ','ur':'ساتھ','ne':'सँगै','sa':'सह'},
+    'without':{'hi':'बिना','ta':'இல்லாமல்','te':'లేకుండా','kn':'ಇಲ್ಲದೆ','ml':'ഇല്ലാതെ','bn':'ছাড়া','mr':'शिवाय','gu':'વिना','pa':'ਬਿਨਾ','ur':'بغیر','ne':'बिना','sa':'विना'},
+    'words':{'hi':'शब्द','ta':'வார்த்தைகள்','te':'పదాలు','kn':'ಪದಗಳು','ml':'വാക്കുകൾ','bn':'শব্দ','mr':'शब्द','gu':'શब्द','pa':'ਸ਼ਬਦ','ur':'الفاظ','ne':'शब्दहरू','sa':'शब्दाः'},
+    'work':{'hi':'काम','ta':'வேலை','te':'పని','kn':'ಕೆಲಸ','ml':'ജോലി','bn':'কাজ','mr':'काम','gu':'કाम','pa':'ਕੰਮ','ur':'کام','ne':'काम','sa':'कार्यम्'},
+    'world':{'hi':'दुनिया','ta':'உலகம்','te':'ప్రపంచం','kn':'ಜಗತ್ತು','ml':'ലോകം','bn':'বিশ্ব','mr':'जग','gu':'વिश्व','pa':'ਦੁਨੀਆ','ur':'دنیا','ne':'संसार','sa':'जगत्'},
+    'wrong':{'hi':'गलत','ta':'தவறு','te':'తప్పు','kn':'ತಪ್ಪು','ml':'തെറ്റ്','bn':'ভুল','mr':'चुकीचे','gu':'ખोटुं','pa':'ਗਲਤ','ur':'غلط','ne':'गलत','sa':'असत्यम्'},
+    'you':{'hi':'तुम','ta':'நீ','te':'నువ్వు','kn':'ನೀನು','ml':'നീ','bn':'তুমি','mr':'तू','gu':'તुं','pa':'ਤੁਸੀਂ','ur':'تم','ne':'तपाईं','sa':'त्वम्'},
+    'your':{'hi':'तुम्हारा','ta':'உன்னுடைய','te':'నీ','kn':'ನಿನ್ನ','ml':'നിന്റെ','bn':'তোমার','mr':'तुमचे','gu':'તारुं','pa':'ਤੁਹਾਡਾ','ur':'تمہارا','ne':'तपाईंको','sa':'तव'},
+    'yourself':{'hi':'खुद','ta':'நீயே','te':'నువ్వే','kn':'ನೀನೇ','ml':'നീ തന്നെ','bn':'নিজে','mr':'स्वतः','gu':'જाते','pa':'ਆਪ','ur':'خود','ne':'आफैं','sa':'स्वयम्'},
+  };
+
+  // ════════════════════════════════════════════════════════════════
+  // TRANSLATION ENGINE
+  // Uses ISL_TRANSLATIONS first, MyMemory as fallback, English as last resort
+  // ════════════════════════════════════════════════════════════════
+  const translationCache = new Map();
+
+  async function translateText(text, targetLang) {
+    if (!text || targetLang.myMemory === 'en') return text;
+
+    const clean    = text.trim().toLowerCase().replace(/_/g, ' ');
+    const langCode = targetLang.myMemory;
+
+    // 1. Check hardcoded ISL map first — always accurate, instant
+    if (ISL_TRANSLATIONS[clean]?.[langCode]) {
+      return ISL_TRANSLATIONS[clean][langCode];
+    }
+
+    // 2. Try translation cache
+    const cacheKey = `${clean}__${langCode}`;
+    if (translationCache.has(cacheKey)) return translationCache.get(cacheKey);
+
+    // 3. Try MyMemory API (with validation)
+    const validate = (t, data) => {
+      if (!t || t.trim().length === 0) return false;
+      if (/MYMEMORY|PLEASE SELECT|QUERY LENGTH|KINDLY|INVALID|DAILY LIMIT|QUOTA|FREE|CONTRIB/i.test(t)) return false;
+      if (t.length > clean.length * 4) return false;
+      if (/https?:\/\/|@[a-z]+\.[a-z]/i.test(t)) return false;
+      if (/^[a-zA-Z\s.,!?'"\-]+$/.test(t) && t.split(' ').length > 2) return false;
+      if (data?.responseStatus !== 200) return false;
+      return true;
+    };
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean.slice(0, 100))}&langpair=en|${langCode}`;
+        const res  = await fetch(url, { signal: AbortSignal.timeout(4000) });
+        const data = await res.json();
+        const t    = data?.responseData?.translatedText || '';
+        if (validate(t, data)) {
+          translationCache.set(cacheKey, t);
+          return t;
+        }
+      } catch (e) {
+        if (attempt === 0) await new Promise(r => setTimeout(r, 800));
+      }
+    }
+
+    // 4. Fall back to English — never speak gibberish
+    return clean;
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // TTS ENGINE — ResponsiveVoice (all Indian languages)
+  // CDN: responsivevoice.org — works on any hosted URL, no signup
+  // Fallback: Web Speech API (English / if RV CDN unreachable)
+  // ════════════════════════════════════════════════════════════════
+
+  // ResponsiveVoice voice name for each myMemory lang code
+  const RV_VOICES = {
+    'hi': 'Hindi Female',
+    'ta': 'Tamil Female',
+    'te': 'Telugu Female',
+    'kn': 'Kannada Female',
+    'ml': 'Malayalam Female',
+    'bn': 'Bengali Female',
+    'mr': 'Marathi Female',
+    'gu': 'Gujarati Female',
+    'pa': 'Punjabi Female',
+    'ur': 'Urdu Female',
+    'ne': 'Nepali Female',
+    'or': 'Hindi Female',    // Odia — closest available
+    'as': 'Bengali Female',  // Assamese — same script as Bengali
+    'sa': 'Hindi Female',    // Sanskrit — Hindi voice
+    'sd': 'Urdu Female',     // Sindhi — Urdu script
+    'ks': 'Urdu Female',     // Kashmiri — Urdu script
+    'en': 'UK English Female',
+  };
+
+  function stopAudio() {
+    if (typeof responsiveVoice !== 'undefined') responsiveVoice.cancel();
+    window.speechSynthesis.cancel();
+  }
+
+  function setSpeakingUI(on) {
+    isSpeaking = on;
+    speakBtn.classList.toggle('speaking', on);
+    speakBtn.innerHTML = on
+      ? '<span class="speak-dot"></span> Speaking…'
+      : '<span class="speak-dot"></span> 🔊 Speak';
+  }
+
+  // Web Speech — English fallback only
+  function speakWebSpeech(text, ttsLang) {
+    return new Promise(async resolve => {
+      const voices = await ensureVoicesLoaded();
+      const voice  = voices.find(v => v.lang === ttsLang)
+                  || voices.find(v => v.lang.startsWith(ttsLang.split('-')[0]))
+                  || voices.find(v => v.lang.startsWith('en'))
+                  || null;
+      window.speechSynthesis.cancel();
+      const utt  = new SpeechSynthesisUtterance(text);
+      utt.lang   = voice ? voice.lang : ttsLang;
+      utt.rate   = 0.9;
+      utt.pitch  = 1.0;
+      if (voice) utt.voice = voice;
+      utt.onstart = () => setSpeakingUI(true);
+      utt.onend   = () => { setSpeakingUI(false); resolve(); };
+      utt.onerror = () => { setSpeakingUI(false); resolve(); };
+      window.speechSynthesis.speak(utt);
+    });
+  }
+
+  async function speakTranslated(signText) {
+    const lang      = activeLang.recog;
+    const cleanSign = signText.replace(/_/g, ' ').trim().toLowerCase();
+
+    // ── Step 1: Translate ─────────────────────────────────────────
+    speechOutTxt.textContent = `Translating to ${lang.name}…`;
+    speechOutTxt.classList.add('active');
+
+    let displayText = cleanSign;
+    if (lang.myMemory !== 'en') {
+      const translated    = await translateText(cleanSign, lang);
+      const isEnglishBack = /^[a-zA-Z\s]+$/.test(translated) && translated.toLowerCase() === cleanSign;
+      displayText = (translated && !isEnglishBack) ? translated : cleanSign;
+    }
+
+    speechOutTxt.textContent = `"${displayText}" (${lang.name})`;
+    speechOutTxt.classList.add('active');
+
+    // ── Step 2: Speak via ResponsiveVoice (always — no voiceSupport() gate) ──
+    const rvVoice = RV_VOICES[lang.myMemory] || 'UK English Female';
+
+    // Wait up to 3s for RV to load if it hasn't yet
+    if (typeof responsiveVoice === 'undefined') {
+      await new Promise(res => setTimeout(res, 3000));
+    }
+
+    if (typeof responsiveVoice !== 'undefined') {
+      stopAudio();
+      setSpeakingUI(true);
+      responsiveVoice.speak(displayText, rvVoice, {
+        rate:    0.9,
+        pitch:   1,
+        volume:  1,
+        onend:   () => setSpeakingUI(false),
+        onerror: () => {
+          setSpeakingUI(false);
+          speakWebSpeech(displayText, lang.ttsLang);
+        },
+      });
+      return;
+    }
+
+    // ── Step 3: Web Speech fallback (RV totally unavailable) ─────
+    await speakWebSpeech(displayText, lang.ttsLang);
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // LANGUAGE STATE
+  // ════════════════════════════════════════════════════════════════
+  let activeLang = {
+    translate: LANGUAGES[0],
+    recog:     LANGUAGES[0],
+    global:    LANGUAGES[0],
+  };
+
+  function buildNavLangSelect() {
+    const sel = document.getElementById('global-lang-select');
+    LANGUAGES.forEach(l => {
+      const o = document.createElement('option');
+      o.value = l.code; o.textContent = l.name;
+      sel.appendChild(o);
+    });
+    sel.value = activeLang.global.code;
+    sel.addEventListener('change', () => {
+      const l = LANGUAGES.find(x => x.code === sel.value);
+      if (!l) return;
+      activeLang.global = l;
+      document.getElementById('nav-flag').textContent = l.flag;
+      setActiveChip('translate', l);
+      setActiveChip('recog', l);
+      if (recording) { stopSpeech(); setTimeout(startSpeech, 300); }
+      toast(`Language set to ${l.name}`, 'ok');
+    });
+  }
+
+  function buildLangPanel(panelId, onSelect) {
+    const chipsEl  = document.getElementById(`${panelId}-lang-chips`);
+    const gridEl   = document.getElementById(`${panelId}-lang-grid`);
+    const moreBtn  = document.getElementById(`${panelId}-lang-more`);
+    const dropdown = document.getElementById(`${panelId}-lang-dropdown`);
+
+    const quickLangs = LANGUAGES.filter(l => l.quick);
+    chipsEl.innerHTML = '';
+    quickLangs.forEach(l => {
+      const btn = document.createElement('button');
+      btn.className = 'lang-chip' + (l.code === activeLang[panelId]?.code ? ' active' : '');
+      btn.dataset.code = l.code;
+      btn.textContent  = l.name;
+      btn.addEventListener('click', () => {
+        setActiveChip(panelId, l); onSelect(l);
+        dropdown.classList.remove('open');
+      });
+      chipsEl.appendChild(btn);
+    });
+
+    gridEl.innerHTML = '';
+    LANGUAGES.forEach(l => {
+      const div = document.createElement('div');
+      div.className = 'lang-opt' + (l.code === activeLang[panelId]?.code ? ' selected' : '');
+      div.dataset.code = l.code;
+      div.innerHTML = `<span class="lo-flag">${l.flag}</span><div><div class="lo-name">${l.name}</div><div class="lo-native">${l.native}</div></div>`;
+      div.addEventListener('click', () => {
+        setActiveChip(panelId, l); onSelect(l);
+        dropdown.classList.remove('open');
+      });
+      gridEl.appendChild(div);
+    });
+
+    moreBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+
+    document.addEventListener('click', e => {
+      if (!dropdown.contains(e.target) && e.target !== moreBtn)
+        dropdown.classList.remove('open');
+    });
+  }
+
+  function setActiveChip(panelId, lang) {
+    activeLang[panelId] = lang;
+    document.querySelectorAll(`#${panelId}-lang-chips .lang-chip`).forEach(c =>
+      c.classList.toggle('active', c.dataset.code === lang.code));
+    document.querySelectorAll(`#${panelId}-lang-grid .lang-opt`).forEach(c =>
+      c.classList.toggle('selected', c.dataset.code === lang.code));
+    const navSel = document.getElementById('global-lang-select');
+    if (activeLang.translate.code === activeLang.recog.code) {
+      navSel.value = lang.code;
+      document.getElementById('nav-flag').textContent = lang.flag;
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // APP LOGIC
+  // ════════════════════════════════════════════════════════════════
+  const CFG = {
+    translateEp:  localStorage.getItem('j_translate')  || 'https://ahwchrh9z0.execute-api.ap-south-1.amazonaws.com/prod/resolve',
+    recognizeEp:  localStorage.getItem('j_recognize')  || 'https://6n5ur96sk6.execute-api.ap-south-1.amazonaws.com/prod/recognize',
+    apiKey:       localStorage.getItem('j_key')        || '3t2XrVzJQP4E9x7S3ksWW5PIconSSPH782gu39XS',
+    autoTranslate: true,
+    cacheEnabled:  false,
+    debounceMs:    800,
+  };
+
+  let _toastT = null;
+  function toast(msg, type = '') {
+    const el = document.getElementById('toast');
+    el.textContent = msg; el.className = 'toast show ' + type;
+    clearTimeout(_toastT);
+    _toastT = setTimeout(() => el.className = 'toast', 3200);
+  }
+
+  function syncDot() {
+    document.getElementById('api-dot').classList.toggle('on', !!(CFG.apiKey || CFG.recognizeEp));
+  }
+  syncDot();
+
+  const micBtn     = document.getElementById('mic-btn');
+  const textInput  = document.getElementById('text-input');
+  const xlBtn      = document.getElementById('translate-btn');
+  const stListen   = document.getElementById('state-listening');
+  const stLoad     = document.getElementById('state-loading');
+  const gifEl      = document.getElementById('gif-display');
+  const stErr      = document.getElementById('state-error');
+  const errMsg     = document.getElementById('error-msg');
+  const retryBtn   = document.getElementById('retry-btn');
+  const seqInfo    = document.getElementById('sequence-info');
+  const seqDots    = document.getElementById('sequence-dots');
+  const seqCtr     = document.getElementById('seq-counter');
+  const chips      = document.getElementById('token-chips');
+  const autoTog    = document.getElementById('auto-toggle');
+  const cacheTog   = document.getElementById('cache-toggle');
+  const grammarStrip = document.getElementById('isl-grammar-strip');
+  const grammarText  = document.getElementById('isl-grammar-text');
+  const cfgBtn  = document.getElementById('configure-btn');
+  const overlay = document.getElementById('modal-overlay');
+  const mEp     = document.getElementById('m-endpoint');
+  const mRec    = document.getElementById('m-rec-endpoint');
+  const mKey    = document.getElementById('m-key');
+  const mSave   = document.getElementById('modal-save');
+  const mCancel = document.getElementById('modal-cancel');
+
+  let SR = null, recording = false, debTimer = null;
+  let gifQueue = [], gifIdx = 0, lastText = '';
+
+  function setState(s) {
+    stListen.style.display = s === 'l' ? 'flex'  : 'none';
+    stLoad.style.display   = s === 'x' ? 'flex'  : 'none';
+    gifEl.style.display    = s === 'g' ? 'block' : 'none';
+    stErr.style.display    = s === 'e' ? 'flex'  : 'none';
+  }
+  setState('l');
+
+  micBtn.addEventListener('click', () => recording ? stopSpeech() : startSpeech());
+
+  function startSpeech() {
+    const API = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!API) { toast('Speech recognition requires Chrome.', 'err'); return; }
+    SR = new API();
+    SR.continuous = true; SR.interimResults = true;
+    SR.lang = activeLang.translate.code;
+    SR.onstart  = () => { recording = true;  micBtn.classList.add('recording'); };
+    SR.onend    = () => { recording = false; micBtn.classList.remove('recording'); };
+    SR.onerror  = e => { if (e.error !== 'no-speech') toast('Speech error: ' + e.error, 'err'); stopSpeech(); };
+    SR.onresult = e => {
+      let fin = '', int = '';
+      for (let i = e.resultIndex; i < e.results.length; i++)
+        (e.results[i].isFinal ? (fin += e.results[i][0].transcript) : (int += e.results[i][0].transcript));
+      textInput.value = fin || int;
+      if (fin && CFG.autoTranslate) {
+        clearTimeout(debTimer);
+        debTimer = setTimeout(() => translate(fin), CFG.debounceMs);
+      }
+    };
+    SR.start();
+  }
+
+  function stopSpeech() { SR?.stop(); recording = false; micBtn.classList.remove('recording'); }
+
+  xlBtn.addEventListener('click', () => { const t = textInput.value.trim(); if (t) translate(t); });
+  textInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); const t = textInput.value.trim(); if (t) translate(t); }
+  });
+
+  async function translate(rawText) {
+    lastText = rawText;
+    if (!CFG.translateEp) { demoMode(rawText); return; }
+    setState('x'); seqInfo.style.display = 'none'; chips.innerHTML = '';
+    grammarStrip.classList.remove('show');
+
+    try {
+      let englishText = rawText;
+      const inputLang = activeLang.translate;
+      if (inputLang.myMemory !== 'en') {
+        try {
+          const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(rawText)}&langpair=${inputLang.myMemory}|en`;
+          const res  = await fetch(url, { signal: AbortSignal.timeout(4000) });
+          const data = await res.json();
+          if (data.responseStatus === 200 && data.responseData?.translatedText)
+            englishText = data.responseData.translatedText;
+        } catch(e) { console.warn('Input translation failed, using original'); }
+      }
+
+      const islGrammarText = applyISLGrammar(englishText);
+      if (islGrammarText && islGrammarText !== englishText.toLowerCase().trim()) {
+        grammarText.textContent = islGrammarText.toUpperCase();
+        grammarStrip.classList.add('show');
+      }
+
+      const normalizedText = normalizeForISL(islGrammarText);
+
+      const r = await fetch(CFG.translateEp, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CFG.apiKey },
+        body: JSON.stringify({ text: normalizedText, language: 'ISL' }),
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+
+      if (d.success && d.gifs?.length) {
+        const valid = d.gifs.filter(g => g.url);
+        if (valid.length) { renderChips(d.gifs); playSeq(valid); return; }
+      }
+      setState('l');
+    } catch { showErr('Unable to reach the translation service. Check your API configuration.'); }
+  }
+
+  function demoMode(text) {
+    setState('x'); chips.innerHTML = '';
+    const words = text.toLowerCase().split(/\s+/).slice(0, 8);
+    setTimeout(() => {
+      renderChips(words.map(w => ({ token: w, url: null, type: Math.random() > .5 ? 'word' : 'phrase' })));
+      stListen.querySelector('.listening-text').textContent = 'Demo mode — configure your API to enable GIF playback.';
+      setState('l'); seqInfo.style.display = 'none';
+    }, 1200);
+  }
+
+  function isGifUrl(url) { return url && url.toLowerCase().split('?')[0].endsWith('.gif'); }
+
+  let _gifTimer = null;
+
+  function playSeq(gifs) {
+    clearTimeout(_gifTimer);
+    const imgEl = document.getElementById('isl-img-player');
+    if (imgEl) { imgEl.style.display = 'none'; imgEl.src = ''; }
+    gifEl.onended = null;
+    gifQueue = gifs; gifIdx = 0;
+    renderDots(gifs.length); seqInfo.style.display = 'flex'; nextGif();
+  }
+
+  function nextGif() {
+    if (gifIdx >= gifQueue.length) gifIdx = 0;
+    const g = gifQueue[gifIdx];
+    updateDots(gifIdx);
+    seqCtr.textContent = `${gifIdx + 1} / ${gifQueue.length}`;
+    gifIdx++;
+    const url = g.url;
+
+    if (isGifUrl(url)) {
+      gifEl.style.display = 'none';
+      gifEl.onended = null;
+      let imgEl = document.getElementById('isl-img-player');
+      if (!imgEl) {
+        imgEl = document.createElement('img');
+        imgEl.id = 'isl-img-player';
+        imgEl.style.cssText = 'display:block;width:100%;max-height:210px;object-fit:contain;border-radius:8px;';
+        document.getElementById('avatar-stage').appendChild(imgEl);
+      }
+      stListen.style.display = 'none';
+      stLoad.style.display   = 'none';
+      stErr.style.display    = 'none';
+      imgEl.style.display    = 'block';
+      imgEl.src = url;
+      const duration = gifQueue.length === 1 ? 2500 : 2000;
+      _gifTimer = setTimeout(() => { imgEl.style.display = 'none'; nextGif(); }, duration);
+    } else {
+      const imgEl = document.getElementById('isl-img-player');
+      if (imgEl) imgEl.style.display = 'none';
+      setState('g');
+      gifEl.onended = null;
+      gifEl.onloadedmetadata = null;
+      gifEl.onerror = null;
+      if (gifQueue.length > 1) {
+        gifEl.classList.remove('fade-in');
+        void gifEl.offsetWidth;
+        gifEl.classList.add('fade-in');
+      }
+      gifEl.src = url;
+      gifEl.load();
+      gifEl.play().catch(() => { _gifTimer = setTimeout(() => nextGif(), 2000); });
+      gifEl.onended = () => { gifEl.onended = null; _gifTimer = setTimeout(() => nextGif(), 200); };
+      gifEl.onloadedmetadata = () => {
+        if (!gifEl.duration || !isFinite(gifEl.duration))
+          _gifTimer = setTimeout(() => { gifEl.onended = null; nextGif(); }, 2000);
+      };
+      gifEl.onerror = () => { if (gifQueue.length > 0) _gifTimer = setTimeout(() => nextGif(), 500); };
+    }
+  }
+
+  function renderDots(n) {
+    seqDots.innerHTML = Array.from({ length: Math.min(n, 20) }, () => '<span class="seq-dot"></span>').join('');
+  }
+  function updateDots(a) {
+    document.querySelectorAll('.seq-dot').forEach((d, i) =>
+      d.className = 'seq-dot' + (i < a ? ' done' : i === a ? ' active' : ''));
+  }
+  function renderChips(gifs) {
+    chips.innerHTML = gifs.map(g => {
+      const c = g.type === 'phrase' ? 'chip-phrase' : g.type === 'word' ? 'chip-word' : 'chip-unmatched';
+      return `<span class="chip ${c}">${g.token}</span>`;
+    }).join('');
+  }
+  function showErr(m) { errMsg.textContent = m; setState('e'); }
+
+  retryBtn.addEventListener('click', () => { if (lastText) translate(lastText); });
+  autoTog.addEventListener('click', () => {
+    CFG.autoTranslate = !CFG.autoTranslate;
+    autoTog.classList.toggle('on', CFG.autoTranslate);
+    autoTog.setAttribute('aria-pressed', String(CFG.autoTranslate));
+  });
+  cacheTog.addEventListener('click', () => {
+    CFG.cacheEnabled = !CFG.cacheEnabled;
+    cacheTog.classList.toggle('on', CFG.cacheEnabled);
+    cacheTog.setAttribute('aria-pressed', String(CFG.cacheEnabled));
+  });
+  cfgBtn.addEventListener('click', e => {
+    e.preventDefault(); mEp.value = CFG.translateEp; mRec.value = CFG.recognizeEp; mKey.value = CFG.apiKey;
+    overlay.classList.add('open'); mEp.focus();
+  });
+  mCancel.addEventListener('click', () => overlay.classList.remove('open'));
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.classList.remove('open'); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') overlay.classList.remove('open'); });
+  mSave.addEventListener('click', () => {
+    CFG.translateEp = mEp.value.trim(); CFG.recognizeEp = mRec.value.trim(); CFG.apiKey = mKey.value.trim();
+    localStorage.setItem('j_translate', CFG.translateEp);
+    localStorage.setItem('j_recognize', CFG.recognizeEp);
+    localStorage.setItem('j_key', CFG.apiKey);
+    overlay.classList.remove('open'); syncDot(); toast('Configuration saved.', 'ok');
+  });
+
+  // ════════════════════════════════════════════════════════════════
+  // SIGN RECOGNITION
+  // ════════════════════════════════════════════════════════════════
+  const SEQ_FRAMES    = 30;
+  const MIN_FRAMES    = 15;
+  const PRED_COOLDOWN = 2000;
+
+  let stream = null, hands = null, raf = null, running = false, lastPred = 0;
+  let frameBuffer   = [];
+  let isClassifying = false;
+  let lastSign   = '';
+  let isSpeaking = false;
+
+  const vid          = document.getElementById('rec-video');
+  const cvs          = document.getElementById('rec-canvas');
+  const ctx          = cvs.getContext('2d');
+  const camIdle      = document.getElementById('cam-idle');
+  const liveBadge    = document.getElementById('live-badge');
+  const handBadge    = document.getElementById('hand-badge');
+  const camStart     = document.getElementById('cam-start');
+  const camStop      = document.getElementById('cam-stop');
+  const predBox      = document.getElementById('pred-box');
+  const confWrap     = document.getElementById('conf-wrap');
+  const confFill     = document.getElementById('conf-fill');
+  const confPct      = document.getElementById('conf-pct');
+  const altsWrap     = document.getElementById('alts-wrap');
+  const altsList     = document.getElementById('alts-list');
+  const sIcon        = document.getElementById('status-icon');
+  const sTxt         = document.getElementById('status-text');
+  const speechOutTxt = document.getElementById('speech-out-text');
+  const speakBtn     = document.getElementById('speak-btn');
+
+  function setStatus(icon, text) { sIcon.textContent = icon; sTxt.textContent = text; }
+
+  let _voicesReady = false;
+  function ensureVoicesLoaded() {
+    return new Promise(resolve => {
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length > 0) { _voicesReady = true; resolve(voices); return; }
+      window.speechSynthesis.onvoiceschanged = () => {
+        _voicesReady = true;
+        resolve(window.speechSynthesis.getVoices());
+      };
+    });
+  }
+  ensureVoicesLoaded();
+
+  speakBtn.addEventListener('click', () => {
+    if (isSpeaking) { stopAudio(); return; }
+    if (lastSign) speakTranslated(lastSign);
+    else toast('No sign detected yet.', '');
+  });
+
+  camStart.addEventListener('click', async () => {
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } });
+      vid.srcObject = stream; await vid.play();
+      camIdle.style.display = 'none'; liveBadge.classList.add('show');
+      camStart.style.display = 'none'; camStop.style.display = 'block';
+      setStatus('⏳', 'Initializing hand detection…');
+      hands = new Hands({ locateFile: f => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${f}` });
+      hands.setOptions({ maxNumHands: 2, modelComplexity: 1, minDetectionConfidence: 0.5, minTrackingConfidence: 0.5 });
+      hands.onResults(onResults);
+      await hands.initialize();
+      running = true; setStatus('🟢', 'Ready — show a hand sign');
+      toast('Camera active. Show a sign to begin.', 'ok');
+      loop();
+    } catch (e) {
+      setStatus('❌', 'Camera unavailable'); toast('Camera error: ' + e.message, 'err');
+    }
+  });
+
+  camStop.addEventListener('click', () => {
+    running = false; cancelAnimationFrame(raf);
+    stream?.getTracks().forEach(t => t.stop()); stream = null; vid.srcObject = null;
+    camIdle.style.display = 'flex'; liveBadge.classList.remove('show'); handBadge.classList.remove('show');
+    camStart.style.display = 'block'; camStop.style.display = 'none';
+    setStatus('⏸', 'Camera stopped');
+    predBox.classList.remove('live');
+    predBox.innerHTML = '<p class="pred-idle-txt">Start camera to begin</p>';
+    confWrap.style.display = 'none'; altsWrap.style.display = 'none';
+    speechOutTxt.textContent = 'Awaiting sign input…';
+    speechOutTxt.classList.remove('active');
+    stopAudio();
+    lastSign = ''; frameBuffer = []; isClassifying = false;
+  });
+
+  const offCvs = document.createElement('canvas');
+  const offCtx = offCvs.getContext('2d');
+
+  function loop() {
+    if (!running) return;
+    const W = vid.videoWidth || 640, H = vid.videoHeight || 480;
+    offCvs.width = W; offCvs.height = H;
+    offCtx.drawImage(vid, 0, 0, W, H);
+    cvs.width = W; cvs.height = H;
+    hands.send({ image: offCvs }).catch(() => {});
+    raf = requestAnimationFrame(loop);
+  }
+
+  function onResults(res) {
+    ctx.clearRect(0, 0, cvs.width, cvs.height);
+    if (res.multiHandLandmarks?.length) {
+      const count = res.multiHandLandmarks.length;
+      handBadge.classList.add('show');
+      handBadge.textContent = count === 2 ? '🤝 Both Hands' : '✋ Hand Detected';
+      res.multiHandLandmarks.forEach(lm => drawSkeleton(lm));
+
+      const dominant = pickDominant(res.multiHandLandmarks);
+      const w        = dominant[0];
+      const frame    = dominant.flatMap(p => [p.x - w.x, p.y - w.y, p.z - w.z]);
+
+      frameBuffer.push(frame);
+      if (frameBuffer.length > SEQ_FRAMES) frameBuffer.shift();
+
+      const filled = Math.min(frameBuffer.length, SEQ_FRAMES);
+      const pct    = Math.round((filled / SEQ_FRAMES) * 100);
+      if (frameBuffer.length < SEQ_FRAMES) {
+        setStatus('⏳', `Buffering… ${pct}% (hold sign steady)`);
+      }
+
+      const now = Date.now();
+      if (frameBuffer.length >= MIN_FRAMES && !isClassifying && now - lastPred > PRED_COOLDOWN) {
+        lastPred = now;
+        callAPI([...frameBuffer]);
+      }
+    } else {
+      handBadge.classList.remove('show');
+      if (running) setStatus('👁️', 'No hand detected — position your hand in frame');
+    }
+  }
+
+  function pickDominant(allHands) {
+    if (allHands.length === 1) return allHands[0];
+    const size = lm => {
+      const xs = lm.map(p => p.x), ys = lm.map(p => p.y);
+      return (Math.max(...xs) - Math.min(...xs)) * (Math.max(...ys) - Math.min(...ys));
+    };
+    return size(allHands[0]) >= size(allHands[1]) ? allHands[0] : allHands[1];
+  }
+
+  function drawSkeleton(lm) {
+    const W = cvs.width, H = cvs.height;
+    const EDGES = [
+      [0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],
+      [0,9],[9,10],[10,11],[11,12],[0,13],[13,14],[14,15],[15,16],
+      [0,17],[17,18],[18,19],[19,20],[5,9],[9,13],[13,17],
+    ];
+    ctx.lineWidth = 2;
+    EDGES.forEach(([a, b]) => {
+      const g = ctx.createLinearGradient(lm[a].x*W, lm[a].y*H, lm[b].x*W, lm[b].y*H);
+      g.addColorStop(0, 'rgba(167,139,250,0.75)');
+      g.addColorStop(1, 'rgba(103,232,249,0.75)');
+      ctx.strokeStyle = g;
+      ctx.beginPath(); ctx.moveTo(lm[a].x*W, lm[a].y*H); ctx.lineTo(lm[b].x*W, lm[b].y*H); ctx.stroke();
+    });
+    lm.forEach((p, i) => {
+      ctx.beginPath(); ctx.arc(p.x*W, p.y*H, i === 0 ? 7 : 4, 0, Math.PI*2);
+      const col = i === 0 ? '#67e8f9' : '#a78bfa';
+      ctx.fillStyle = col; ctx.shadowColor = col; ctx.shadowBlur = i === 0 ? 10 : 5;
+      ctx.fill(); ctx.shadowBlur = 0;
+    });
+  }
+
+  async function callAPI(buffer) {
+    if (isClassifying) return;
+    isClassifying = true;
+    setStatus('🎮', 'Classifying sign…');
+    const seq = [...buffer];
+    while (seq.length < SEQ_FRAMES) seq.push(new Array(63).fill(0));
+    const sequence = seq.slice(0, SEQ_FRAMES);
+    try {
+      const r = await fetch(CFG.recognizeEp, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': CFG.apiKey },
+        body: JSON.stringify({ sequence }),
+      });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      if (d.success) {
+        if (d.sign) {
+          renderPred(d);
+          setStatus('✅', 'Live — recognition active');
+          if (d.sign !== lastSign && d.confidence > 0.6) {
+            lastSign = d.sign;
+            speakTranslated(d.sign.replace(/_/g, ' '));
+          }
+        } else {
+          setStatus('👁️', d.message || 'Keep signing…');
+        }
+      } else {
+        setStatus('⚠️', d.error || 'Unexpected model response');
+      }
+    } catch (e) {
+      setStatus('❌', 'Request failed — ' + e.message);
+    } finally {
+      isClassifying = false;
+    }
+  }
+
+  function renderPred(d) {
+    const p = Math.round(d.confidence * 100);
+    predBox.classList.add('live');
+    predBox.innerHTML = `
+      <div class="pred-eyebrow">Recognized Sign</div>
+      <div class="pred-sign">${d.sign.replace(/_/g,' ').toUpperCase()}</div>
+      <div class="pred-conf-lbl">${p}% confidence</div>`;
+    confWrap.style.display = 'block';
+    confFill.style.width = p + '%'; confPct.textContent = p + '%';
+    if (d.top3?.length) {
+      altsWrap.style.display = 'block';
+      altsList.innerHTML = d.top3.map((it, i) => `
+        <div class="alt-row ${i === 0 ? 'top' : ''}">
+          <span class="alt-name">${it.sign}</span>
+          <span class="alt-pct">${Math.round(it.confidence * 100)}%</span>
+        </div>`).join('');
+    }
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  // INIT
+  // ════════════════════════════════════════════════════════════════
+  // Pre-warm ResponsiveVoice so it is ready on first Speak click
+  window.addEventListener('load', () => {
+    if (typeof responsiveVoice !== 'undefined') {
+      responsiveVoice.speak(' ', 'UK English Female', { volume: 0 });
+      setTimeout(() => responsiveVoice.cancel(), 300);
+    }
+  });
+
+  // ── Extension Demo Modal ──────────────────────────────────────
+  const extOverlay = document.getElementById('ext-modal-overlay');
+  const extIframe  = document.getElementById('ext-modal-iframe');
+  const extClose   = document.getElementById('ext-modal-close');
+  const extDemoBtn = document.getElementById('ext-demo-btn');
+
+  extDemoBtn.addEventListener('click', () => {
+    extIframe.src = 'https://dl1agc4y4ofy6.cloudfront.net/cam-ext.html';
+    extOverlay.classList.add('open');
+  });
+  extClose.addEventListener('click', () => {
+    extOverlay.classList.remove('open');
+    extIframe.src = '';
+  });
+  extOverlay.addEventListener('click', e => {
+    if (e.target === extOverlay) {
+      extOverlay.classList.remove('open');
+      extIframe.src = '';
+    }
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && extOverlay.classList.contains('open')) {
+      extOverlay.classList.remove('open');
+      extIframe.src = '';
+    }
+  });
+
+  buildNavLangSelect();
+
+  buildLangPanel('translate', (lang) => {
+    activeLang.translate = lang;
+    if (recording) { stopSpeech(); setTimeout(startSpeech, 300); }
+    toast(`Input language: ${lang.name}`, 'ok');
+  });
+
+  buildLangPanel('recog', (lang) => {
+    activeLang.recog = lang;
+    stopAudio();
+    if (lastSign) {
+      speechOutTxt.textContent = `Language set — tap Speak to hear in ${lang.name}`;
+    }
+    toast(`Speech output: ${lang.name}`, 'ok');
+  });
+
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.style.animationDelay = '0ms'; e.target.classList.add('animate-in'); }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .step-card, .roadmap-item, .arch-node').forEach(el => obs.observe(el));
+
+  </script>
+</body>
+</html>
