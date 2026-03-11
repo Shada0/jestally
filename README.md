@@ -214,7 +214,7 @@ Works inside **Google Meet** and **Zoom**.
 | Languages supported | 22 scheduled Indian languages |
 | ISL signs | 151 |
 | Infrastructure cost at idle | $0 — fully serverless |
-| Inference latency | < 100ms |
+| Inference latency | ~160 ms |
 | Setup required | None — works in any browser |
 
 ---
