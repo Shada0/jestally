@@ -39,7 +39,7 @@
 - **Warm average (Runs 2–10): 206ms**
 - **Minimum: 166ms**
 - **Maximum (warm): 292ms**
-- **Cold start: 2,190ms — one-time, not representative of normal usage**
+- **Cold start: 2,190ms — one-time Lambda container init, not representative of normal usage**
 
 Second test set (already warm): 292, 198, 218, 205, 156, 183, 192, 254, 163, 215ms
 **Average: 208ms — consistent with first set**
@@ -71,7 +71,22 @@ Second test set (already warm): 292, 198, 218, 205, 156, 183, 192, 254, 163, 215
 
 ---
 
-## Section 4 — Cloud Infrastructure
+## Section 4 — End-to-End Latency Breakdown (Warm State)
+
+| Stage | Latency | Notes |
+|---|---|---|
+| Google Translate (input) | ~100ms | Hindi/Tamil/etc → English |
+| Amazon Bedrock Claude Haiku 3 | ~300ms | ISL grammar reordering |
+| DynamoDB n-gram lookup | <5ms | Phrase → gif URL |
+| **Total Speech-to-ISL** | **~500ms** | Full warm pipeline |
+| MediaPipe hand detection | <16ms | On-device, 60fps |
+| Frame buffer (30 frames) | ~500ms | At 60fps |
+| SageMaker classification | ~159ms | Warm endpoint |
+| **Total Sign Recognition** | **~700ms** | Full warm pipeline |
+
+---
+
+## Section 5 — Cloud Infrastructure
 
 ### Lambda — jestally-isl-resolver-prod
 - Runtime: Node.js 20.x
@@ -110,7 +125,7 @@ Second test set (already warm): 292, 198, 218, 205, 156, 183, 192, 254, 163, 215
 
 ---
 
-## Section 5 — Data Privacy & Bandwidth
+## Section 6 — Data Privacy & Bandwidth
 
 | Approach | Size Per Frame | Privacy |
 |---|---|---|
@@ -126,7 +141,7 @@ Second test set (already warm): 292, 198, 218, 205, 156, 183, 192, 254, 163, 215
 
 ---
 
-## Section 6 — Model Accuracy
+## Section 7 — Model Accuracy
 
 Formal accuracy evaluation is part of the v2 roadmap.
 
@@ -134,12 +149,14 @@ Confirmed from architecture:
 - Model trained on 151 ISL sign classes
 - Input: 30 frames × 63 floats (wrist-normalized xyz landmarks)
 - Output: predicted class + confidence score + top-3 alternatives
-- Minimum frames to trigger: 15 (configurable)
+- Minimum frames to trigger classification: 15 (configurable)
 - Prediction cooldown: 2,000ms between classifications
+- 143 signs have hardcoded translations in ISL_TRANSLATIONS map — instant, no API call
+- MyMemory API used as runtime fallback for any sign not in the map
 
 ---
 
-## Section 7 — AWS Architecture
+## Section 8 — AWS Architecture
 
 8 AWS services in production:
 
@@ -148,11 +165,11 @@ Confirmed from architecture:
 | Amazon CloudFront | Global CDN, serves web app |
 | Amazon S3 | 151 MP4 sign videos, web app, ML weights |
 | Amazon API Gateway | REST API, key auth, CORS |
-| AWS Lambda | ISL resolver + sign recognizer |
-| Amazon DynamoDB | ISL dictionary, 165 entries |
+| AWS Lambda | ISL resolver + sign recognizer (Node.js 20.x) |
+| Amazon DynamoDB | ISL dictionary, 165 entries, multilingual labels |
 | Amazon Bedrock | Claude Haiku 3 — ISL grammar reordering |
-| Amazon SageMaker | TF Serving — 151-class classification |
-| Amazon Translate | One-time seed — sign labels × 15 languages |
+| Amazon SageMaker | TF Serving — 151-class sign classification |
+| Amazon Translate | One-time seed — sign labels × 15 Indian languages |
 
 - Zero idle infrastructure cost — fully serverless
 - Zero video ever uploaded — MediaPipe processes on-device
