@@ -141,7 +141,7 @@ Response: {
 
 ## Tech Stack
 
-**Frontend:** Vanilla HTML/CSS/JS · MediaPipe Hands · Web Speech API · Google Translate (input) · ResponsiveVoice TTS · Chrome Extension MV3
+**Frontend:** Vanilla HTML/CSS/JS · MediaPipe Hands · Web Speech API · Google Translate (input translation) · MyMemory API (sign label fallback) · ResponsiveVoice TTS · ISL_TRANSLATIONS hardcoded map · Chrome Extension MV3
 
 **Backend:** Node.js 20.x on AWS Lambda · AWS SDK v3 · Amazon Bedrock `apac.anthropic.claude-3-haiku-20240307-v1:0` · Custom lemmatizer · Phrase-first n-gram resolver
 
@@ -203,6 +203,8 @@ Works inside **Google Meet** and **Zoom**.
 **Phrase-first resolution:** Multi-word ISL expressions have distinct signs. 4-gram → 3-gram → 2-gram → word lookup ensures contextually accurate sequences.
 
 **Bedrock for grammar:** ISL has SOV word order, topic-comment structure, time-first, WH-last — fundamentally different from English. Claude Haiku handles novel sentences at ~300ms with zero infrastructure.
+
+**TTS label translation:** Sign labels are translated to Indian languages using a hardcoded ISL_TRANSLATIONS map (instant, offline). MyMemory API serves as a runtime fallback for any sign not in the map. ResponsiveVoice then speaks the result in the user's chosen language.
 
 ---
 
